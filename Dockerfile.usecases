@@ -1,0 +1,28 @@
+FROM python:3.10.12-slim as builder
+
+RUN apt-get update -y && \
+    apt-get install -y python3-pip && \
+    pip3 install --upgrade pip
+
+WORKDIR /code
+
+COPY pkg/usecases/requirements.txt .
+
+RUN pip3 wheel --no-cache-dir --no-deps --wheel-dir /app/wheels -r requirements.txt
+
+
+FROM python:3.10.12-slim
+
+WORKDIR /app
+
+COPY --from=builder /app/wheels /wheels
+
+RUN pip3 install --no-cache /wheels/*
+
+COPY pkg/usecases usecases
+
+COPY pkg/discovery discovery
+
+COPY start.sh start.sh
+
+ENTRYPOINT ["sh", "start.sh"] 

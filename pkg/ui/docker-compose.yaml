@@ -1,0 +1,7 @@
+services:
+  web:
+    build: .
+    environment:
+      BASE_URL_OVERRIDE: <add-dm-endpoint>
+    ports:
+      - '8080:9090'

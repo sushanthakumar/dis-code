@@ -1,0 +1,14 @@
+
+*__pycache__*
+*.coverage
+*style.css
+*.db
+*.report.html
+*.log
+*assets/*
+*.db
+*node_modules*
+*.pyc
+*dhcpd.leases
+*package-lock.json
+*.pyc*

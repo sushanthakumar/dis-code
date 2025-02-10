@@ -1,0 +1,70 @@
+services:
+  dm:
+    build: 
+      context: .
+      dockerfile: Dockerfile.devices
+    image: "cazelabs/scn-devices:v0.1.1"
+    networks:
+      - custom_network
+
+    pull_policy: build
+    environment:
+      - PYTHONPATH=/app:/app/pkg
+    command: dm
+    domainname: "scn-devices"
+    restart: always
+    ports:
+      - '5000:5000'
+    deploy:
+      mode: replicated
+      replicas: 1
+      endpoint_mode: vip
+    volumes:
+      - dhcp-data:/tmp/config
+      - device-data:/tmp/devices
+
+  usecases:
+    build: 
+      context: .
+      dockerfile: Dockerfile.usecases
+    image: "cazelabs/scn-usecases:v0.1.1"
+    pull_policy: build
+    command: usecases http://dm:5000
+    ports:
+      - '5001:5001'
+    domainname: "scn-usecases"
+    restart: always
+    depends_on:
+      - dm
+    deploy:
+      mode: replicated
+      replicas: 1
+      endpoint_mode: vip
+    networks:
+      - custom_network
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.ui
+    pull_policy: build
+    restart: always
+    environment:
+      BASE_USECASES_URL_OVERRIDE: 127.0.0.1:5001
+      BASE_DEVICES_URL_OVERRIDE: 127.0.0.1:5000
+    image: "cazelabs/scn-web:v0.1.1"
+    ports:
+      - '8080:9090'
+    
+    volumes:
+      - dhcp-data:/tmp/config
+      - device-data:/tmp/devices
+    networks:
+      - custom_network
+
+volumes:
+  dhcp-data:
+  device-data:
+networks:
+  custom_network:
+    driver: bridge

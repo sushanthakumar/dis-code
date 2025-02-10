@@ -1,0 +1,8 @@
+{
+    "DevicePluginsPool": {
+        "MDS": "mds.py",
+        "MikroTik": "mikrotik.py",
+        "Cisco": "cisco.py",
+        "Juniper": "juniper.py"
+    }
+}
