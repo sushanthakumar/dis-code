@@ -2,7 +2,8 @@ FROM python:3.10.12-slim as builder
 
 RUN apt-get update -y && \
     apt-get install -y python3-pip && \
-    pip3 install --upgrade pip
+    pip3 install --upgrade pip && \
+    pip3 install ping3
 
 WORKDIR /code
 

@@ -22,7 +22,13 @@ services:
     volumes:
       - dhcp-data:/tmp/config
       - device-data:/tmp/devices
+      - ./configs:/tmp/
 
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
   usecases:
     build: 
       context: .
@@ -68,3 +74,5 @@ volumes:
 networks:
   custom_network:
     driver: bridge
+
+

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 '''
 python scn-p1-discovery/core/scn_discovery/src/scn_disc_main.py
 Project name : SmartConfigNxt
@@ -8,20 +7,20 @@ Discription : Discovery and Usecase recommendation
 author : Kamal, Sandhya
 version :1.0
 '''
-
-from flask import Flask,jsonify, request
-from flask_restx import Api, Resource ,fields
-import yaml
-import pandas as pd 
-from flask_cors import CORS
 import os
 import json
+from flask import Flask, request
+from flask_restx import Api, Resource ,fields
+import pandas as pd
+from flask_cors import CORS
+#from discovery.connectors.simulator import device_simulator
+from discovery.services.dhcp_server.dhcp_service import DHCPService
 from devices import ScnDevicesDb
 from utils.scn_log import logger
 from werkzeug.utils import secure_filename
 from discovery.connectors.simulator import device_simulator
 from discovery.services.dhcp_server.dhcp_service import DHCPService
-
+import sys
 
 # Create the Flask app
 app = Flask(__name__)
@@ -41,119 +40,142 @@ model_tag = api.model('tags',{
 ################  scan device #################
 # Api to handle scan request
 @api.route('/v1/synclist')
-class scan(Resource):
+class Scan(Resource):
     @api.doc(description="Retrieve records.")
-    @api.response(200, "Successfully retrieved .")
+    @api.response(200, "Successfully retrieved the devices.")
     @api.response(404, "Not found.")
     @api.response(500, "Internal Server Error.")
     def get(self):
-        logger.debug("Scanning for devices...") 
+        """Function to scan the list of devices"""
+        logger.debug("Scanning for devices...")
         try:
             devices_list = devices_db.scan_and_update()
             devices_list = devices_db.get_devices_list()
+            logger.debug(f"Devices list length: {len(devices_list)}")
+            sys.stdout.flush()  
             return devices_list, 200
         except Exception as e:
             return {"message": str(e)}, 500
-        
 ############# Discovered devices ##############
 
 # Api to handle list request
 @api.route('/v1/devices')
-class list(Resource):
+class List(Resource):
     @api.doc(description="Retrieve records.")
     @api.response(200, "Successfully retrieved .")
     @api.response(404, "Not found.")
     @api.response(500, "Internal Server Error.")
     def get(self):
+        """Function to retrieve the list of devices"""
         logger.debug("Retrieving devices list...")
         try:
             devices_list = devices_db.get_devices_list()
+            print("Length of devices_list: ", len(devices_list))
+            logger.debug(f"Devices list: {devices_list}")
             return devices_list, 200
         except Exception as e:
-            return {"message": str(e)},
+            return {"message": str(e)}
 
 ######### Upload devices #########
-# API for CSV Upload
+"""Function to upload the devices file"""
 def convert_to_wsl_path(path):
-    if ":" in path:  
-        drive, tail = path.split(":", 1)
+    if ":" in path: 
+        drive, tail=path.split(":", 1)
         tail =tail.replace('\\', '/')
         return f"/mnt/{drive.lower()}{tail}"
-    return path  
+    return path
 
-@api.route('/v1/devices/upload/<path:file_path>')
+@api.route('/v1/devices/upload')
 class UploadCSV(Resource):
-    @api.doc(description="Upload a CSV file from the local file system (supports Docker volumes).")
+    @api.doc(description="Upload a device CSV file .")
     @api.response(201, "File uploaded successfully.")
     @api.response(400, "Invalid file path or format.")
-    def post(self, file_path):
+    @api.response(500, "Internal server error.")
+    def post(self):
+        """Function to save devices file in the database"""
         try:
-            
-            file_path = convert_to_wsl_path(file_path)#This line shd be removed later
-            file_path = os.path.abspath(os.path.normpath(file_path))
-            logger.debug(f"Received file path: {file_path}")
+            file_path = "/tmp/devices/0028180482"
+            logger.debug("Received file path:%s", file_path)
 
             # Check if file exists
             if not os.path.exists(file_path):
+                logger.error(f"File not found:%s", file_path)
                 return {"error": "File not found."}, 400
 
             # Read CSV file
             try:
-                csv_data = pd.read_csv(file_path)
+                csv_data = pd.read_csv(file_path, skiprows=4)
+                csv_data.columns = csv_data.columns.str.strip() 
+                logger.debug(f"CSV Data:\n %s " ,csv_data)
+                logger.debug("CSV Columns: %s", csv_data.columns.tolist())
+
             except Exception as e:
-                logger.error(f"Error reading CSV file: {e}")
+                logger.error("Error reading CSV file: %s", e)
                 return {"error": "Failed to read CSV file."}, 400
+
+            # Check if necessary columns exist
+            required_columns = [
+                "Serial ID", "Inventory Type", "Vendor Name", "IP Address",
+                "DHCP Lease", "DHCP Options", "Firmware Version",
+                "Software Version", "Hardware Model"
+            ]
+            missing_columns = [col for col in required_columns if col not in csv_data.columns]
+            if missing_columns:
+                logger.error("Missing columns in CSV: %s", missing_columns)
+                return {"error": f"Missing columns in CSV: {missing_columns}"}, 400
 
             # Database operations
             conn = devices_db.establish_db_conn()
             cursor = conn.cursor()
+            # Iterate over each row in the CSV file
             for _, device in csv_data.iterrows():
-                logger.debug(f"Processing device: {device.to_dict()}")
-
-                cursor.execute("SELECT * FROM device_db WHERE Serial_ID = ?", (device["Serial ID"],))
-                rows = cursor.fetchall()
-
-                if rows:
-                    cursor.execute("""
-                        UPDATE device_db SET 
-                        Inventory_Type = ?, Vendor_Name = ?, IP_Address = ?, 
-                        DHCP_Lease = ?, DHCP_Options = ?, Firmware_Version = ?, 
-                        Software_Version = ?, Hardware_Model = ? 
-                        WHERE Serial_ID = ?
-                    """, (
-                        device["Inventory Type"], device["Vendor Name"], device["IP Address"],
-                        device["DHCP Lease"], device["DHCP Options"], device["Firmware Version"],
-                        device["Software Version"], device["Hardware Model"], device["Serial ID"]
-                    ))
-                else:
-                    cursor.execute("""
-                        INSERT INTO device_db 
-                        (Serial_ID, Inventory_Type, Vendor_Name, IP_Address, 
-                        DHCP_Lease, DHCP_Options, Firmware_Version, 
-                        Software_Version, Hardware_Model) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """, (
-                        device["Serial ID"], device["Inventory Type"], device["Vendor Name"],
-                        device["IP Address"], device["DHCP Lease"], device["DHCP Options"],
-                        device["Firmware Version"], device["Software Version"], device["Hardware Model"]
-                    ))
-
+                try:
+                    serial_id = device["Serial ID"]
+                    cursor.execute("SELECT * FROM device_db WHERE Serial_ID = ?", (serial_id,))
+                    rows = cursor.fetchall()
+                    # If the device already exists, update it 
+                    if rows:
+                        cursor.execute("""
+                            UPDATE device_db SET 
+                            Inventory_Type = ?, Vendor_Name = ?, IP_Address = ?, 
+                            DHCP_Lease = ?, DHCP_Options = ?, Firmware_Version = ?, 
+                            Software_Version = ?, Hardware_Model = ? , Device_Type = "Static"
+                            WHERE Serial_ID = ?
+                        """, (
+                            device["Inventory Type"], device["Vendor Name"], device["IP Address"],
+                            device["DHCP Lease"], device["DHCP Options"], device["Firmware Version"],
+                            device["Software Version"], device["Hardware Model"], serial_id
+                       ))
+                        # If the device is not found, insert it
+                    else:
+                        cursor.execute("""
+                            INSERT INTO device_db 
+                            (Serial_ID, Inventory_Type, Vendor_Name, IP_Address, 
+                            DHCP_Lease, DHCP_Options, Firmware_Version, 
+                            Software_Version, Hardware_Model,Device_Type) 
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, "Static")
+                        """, (
+                            serial_id, device["Inventory Type"], device["Vendor Name"],
+                            device["IP Address"], device["DHCP Lease"], device["DHCP Options"],
+                            device["Firmware Version"], device["Software Version"], device["Hardware Model"]
+                        ))
+                except KeyError as ke:
+                    logger.error("Missing column in row: %s", ke)
+                    continue  # Skip invalid rows
             conn.commit()
-            cursor.close()
-
-            return {"message": "File uploaded successfully"}, 201
-
+            return {"message": "Success"}, 201
         except Exception as e:
-            logger.error(f"Unexpected error: {e}")
+            logger.error("Unexpected error: %s", e, exc_info=True)
             return {"error": "An unexpected error occurred."}, 500
 
-
-
+########## Tagging devices ##########
 @api.route('/v1/devices/<int:id>/tags')        
 @api.expect(model_list)
 class device_tag(Resource):
     def patch(self, id):
+        
         data = request.json
+        tags = data.get("Tag", {})
         tags = data.get("Tag", {})
         conn = devices_db.establish_db_conn()
         cursor = conn.cursor()
@@ -198,14 +220,14 @@ class device_tag(Resource):
         cursor.execute("UPDATE device_db SET Tags = ? WHERE ID = ?", (json.dumps(tag_list), id))
 
         # Commit changes
+        # Commit changes
         conn.commit()
         return {"message": "Tags updated and counts adjusted."}, 200
 
 
 ############ Health Check ###########
-
 @api.route("/v1/devices/healthcheck/<id>")
-class Healthcare(Resource): 
+class Healthcheck(Resource): 
     @api.doc(description="Update healthcare device status.")
     @api.response(200, "Device status updated successfully.")
     @api.response(404, "Device not found.")
@@ -214,13 +236,16 @@ class Healthcare(Resource):
         try:
             conn = devices_db.establish_db_conn()
             cursor = conn.cursor()
-            device_status = "offline"
-
             cursor.execute("SELECT * FROM device_db WHERE ID = ?", (id,))
             device = cursor.fetchone()
-
+        
             if not device:
                 return {"message": "Device not found."}, 404
+            
+            device_status = devices_db.healthcheck(id)
+            if not device_status:  # If the function fails to return a status
+                print(f"Healthcheck returned None for device ID {id}.")
+                return {"message": "Healthcheck failed."}, 500
 
             cursor.execute("UPDATE device_db SET status = ? WHERE ID = ?", (device_status, id))
             conn.commit()
@@ -301,7 +326,7 @@ class tag(Resource):
         if not tag_data:
             return {"result": "Tag not found."}, 404
 
-        tag_id, device_count = tag_data
+        _, device_count = tag_data
 
         # Check if the tag is linked to any devices
         if device_count > 0:
@@ -323,12 +348,15 @@ class dhcp_service_start(Resource):
     @api.response(500, "Internal Server Error.")
     def patch(self):
         print("Patch Starting the DHCP service...")
+        sys.stdout.flush()
         try:
             dhcp_service.start()
             logger.debug("DHCP service started successfully.")
             return {"message": "DHCP service started successfully."}, 200
         except Exception as e:
-            logger.error(f"Error starting DHCP service: {e}")
+            logger.error("Error starting DHCP service: %s", e)
+
+
             return {"message": str(e)}, 500
 
 # Add api to support "/v1/dhcpservice/stop" endpoint
@@ -344,7 +372,7 @@ class dhcp_service_stop(Resource):
             logger.debug("DHCP service stopped successfully.")
             return {"message": "DHCP service stopped successfully."}, 200
         except Exception as e:
-            logger.error(f"Error stopping DHCP service: {e}")
+            logger.error(f"Error stopping DHCP service: %s", e)
             return {"message": str(e)}, 500
 
 
@@ -353,16 +381,11 @@ class dhcp_service_stop(Resource):
 @api.doc(description="devices.")
 class upload(Resource):
     def post(self):
-        try:
             #Loads data from the Recommendations file
-            print("Headers ----> : ", request.headers)
+        print("Headers ----> : ", request.headers)
+        return
 
-            
-            return
-            
-
-        except Exception as e:
-            return {"message": str(e)}, 500
+        
 ######## Upload devices ##############
 @api.route('/v1/devices/upload')
 class UploadCSV(Resource):

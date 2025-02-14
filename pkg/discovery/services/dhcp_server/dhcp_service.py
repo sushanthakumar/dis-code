@@ -6,11 +6,12 @@ import os
 import pandas as pd
 import paramiko
 import json
-
+from utils.scn_log import logger
+ 
 # Get CWD using os with 
 CWD = os.path.dirname(os.path.abspath(__file__))
-DHCP_HOST_CONFIG_FILE = CWD+"/../../../../dhcp_host.conf"
-DHCPD_CONFIG_FILE = CWD+"/../../../../dhcpd.conf"
+DHCP_HOST_CONFIG_FILE = "/tmp/dhcp_host.conf"
+DHCPD_CONFIG_FILE = "/tmp/dhcpd.conf"
 DHCPD_CONFIG_SERVER_PATH = "/etc/dhcp/dhcpd.conf"
 TEMP_REMOTE_PATH = "/tmp/dhcpd_tmp.conf"
 
@@ -28,6 +29,7 @@ class DHCPService:
     
     # Define a method to connect to the DHCP server and keep client object
     def connect(self, config_file=DHCP_HOST_CONFIG_FILE):
+        logger.info("Connecting to the DHCP server...")
         """Connect to the DHCP server."""
         try:
             # Read the configuration json file to get ip, username, password and port
@@ -49,9 +51,9 @@ class DHCPService:
                                 timeout=10)
         
         except Exception as e:
-            print(f"Error connecting to the DHCP server: {e}")
+            logger.info(f"Error connecting to the DHCP server: {e}")
         else:
-            print("Connected to the DHCP server successfully.")
+            logger.info("Connected to the DHCP server successfully.")
     
     # Define a method to execute the command on the DHCP server
     def __execute_command(self, command):
@@ -68,29 +70,35 @@ class DHCPService:
 
     # Define a method to start the DHCP server
     def start(self):
+        print("Start DHCP is called from User!!!")
         self.connect(DHCP_HOST_CONFIG_FILE)
         """Start the DHCP server."""
 
         # Collect dhcp config file from /tmp/dhcpd.conf
         # Send this file to dhcp server
         # use scp to copy the file to dhcp server
-        
         try:
             # # Open SFTP connection
-            # sftp_obj = self.client.open_sftp()
-            # print("SFTP connection established.")
+            sftp_obj = self.client.open_sftp()
+            print("SFTP connection established.")
 
-            # # Transfer file
-            # state = sftp_obj.put(DHCPD_CONFIG_FILE, TEMP_REMOTE_PATH)
+            # Transfer file
+            state = sftp_obj.put(DHCPD_CONFIG_FILE, TEMP_REMOTE_PATH)
             
-            # print(f"File transfer successful. Remote file attributes: {state}")
+            print(f"File transfer successful. Remote file attributes: {state}")
 
-            # # Close SFTP connection
-            # sftp_obj.close()
+            # Close SFTP connection
+            sftp_obj.close()
 
 
             # Move file to the final destination using sudo
+            logger.info(f"Moving the file to the final destination")
             command = f"sudo mv {TEMP_REMOTE_PATH} {DHCPD_CONFIG_SERVER_PATH}"
+
+            command = "sudo chown root:root /etc/dhcp/dhcpd.conf"
+            stdin, stdout, stderr = self.client.exec_command(command)
+            logger.info(f"Executing command: {command}")            
+
             status = self.client.exec_command(command)
             print(f"File moved to the final destination. Status: {status}")
 
@@ -106,7 +114,7 @@ class DHCPService:
     # Define a method to stop the DHCP server
     def stop(self):
         """Stop the DHCP server."""
-        print(f"Stopping the {self.service_name} service...")
+        print(f"Stopping DHCP service...")
         # Execute the command to stop the DHCP server
         self.__execute_command(f"sudo systemctl stop {self.service_name}")
         print(f"{self.service_name} service stopped successfully.")

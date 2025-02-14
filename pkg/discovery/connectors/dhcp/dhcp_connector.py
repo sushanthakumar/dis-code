@@ -15,7 +15,7 @@ from datetime import datetime
 CWD = os.path.dirname(os.path.abspath(__file__))
 
 CWD = os.path.dirname(os.path.abspath(__file__))
-DHCP_HOST_DETAILS = CWD+"/../../../../dhcp_host.conf"
+DHCP_HOST_DETAILS = "/tmp/dhcp_host.conf"
 
 
 DHCP_LEASE_FILE = CWD+"/data/dhcpd.leases"

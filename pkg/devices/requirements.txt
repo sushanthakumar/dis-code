@@ -9,3 +9,4 @@ pytest-cov==6.0.0
 pep8==1.7.1
 datetime==4.3
 PyYAML==6.0
+ping3
