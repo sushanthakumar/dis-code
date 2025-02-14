@@ -1,6 +1,7 @@
 '''
-File:   
-A
+File: scn_disc_db.py
+Author: Sandhya, Kamal
+Description: This file contains the class ScnDevicesDb which is used to create and write data to the database from MDS.
 '''
 import os
 from abc import ABC, abstractmethod
@@ -19,7 +20,7 @@ param_against_file ={
     "DHCP Lease": {"cmd": "DHCP_Lease", "regex":r"(.*)"},
     "DHCP Options": {"cmd": "DHCP_Options", "regex":r"(.*)"},
     "Firmware Version": {"cmd": "Firmware_Version", "regex":r"(.*)"},
-    "Software Version": {"cmd": "show version", "regex":r'Purity//FA\s+(\d+\.\d+\.\d+)'},
+    "Software Version": {"cmd": "show version", "regex":r'NXOS:\s*version\s*([\d\.N\(\)a-zA-Z]+)'},
     "Hardware Model": {"cmd": "cat /proc/cpuinfo", "regex":r"model name\s+:(.*)"},
     "Serial ID": {"cmd": "Serial_ID", "regex":r"(.*)"}
 }
@@ -42,7 +43,7 @@ class DeviceInfo(DeviceInfoPlugin):
             ssh = SSHClient()
             ssh.load_system_host_keys()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            ssh.connect(ip, username=ssh_details["username"], password=ssh_details["password"], port=ssh_details["port"], timeout=5)
+            ssh.connect(ip, username=ssh_details["username"], password=ssh_details["password"], port=ssh_details["port"])
 
             # Get the device information from the MDS
             for key, value in param_against_file.items():
@@ -56,7 +57,6 @@ class DeviceInfo(DeviceInfoPlugin):
                 else:
                     deviceInfo[key] = None
             ssh.close()
-            deviceInfo["Vendor Name"] = "Pure Storage"
         except Exception as e:
             print(f"Error in getting device information: {e}")
             return None
@@ -71,7 +71,7 @@ class DeviceInfo(DeviceInfoPlugin):
 
         try:
             logger.debug(f"Pinging device {ip}...")
-            response = ping(ip, timeout=2)  # ✅ Pings and gets response time
+            response = ping(ip, timeout=2)
             device_status = "Online" if response else "Offline"
             logger.debug(f"Ping result for {ip}: {device_status}")
             return device_status

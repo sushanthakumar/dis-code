@@ -21,3 +21,4 @@ class DeviceInfo(DeviceInfoPlugin):
             'DHCP Lease': 'ValueError'
         }
         deviceInfo.update(updated)
+        deviceInfo["Vendor Name"] = "Pure Storage"

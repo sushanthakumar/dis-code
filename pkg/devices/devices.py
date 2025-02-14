@@ -115,6 +115,7 @@ class ScnDevicesDb:
             #cursor.execute("SELECT COUNT(*) FROM device_db;")
             rows = cursor.fetchall()
             if rows:
+                print(device)
                 cursor.execute("UPDATE device_db SET Inventory_Type = ?, Vendor_Name = ?, IP_Address = ?, DHCP_Lease = ?, DHCP_Options = ?, Firmware_Version = ?, Software_Version = ?, Hardware_Model = ?, Device_Type = 'DHCP' WHERE Serial_ID = ?",
                                 (device["Inventory Type"], device["Vendor Name"], device["IP Address"], device["DHCP Lease"], device["DHCP Options"], device["Firmware Version"], device["Software Version"], device["Hardware Model"], device["Serial ID"]))
             else:
@@ -152,7 +153,7 @@ class ScnDevicesDb:
         SerialNum = 1
         for device in self.devices:
             SerialNum += 1
-            print(f"Scanning device {device['hostname']} with IP {device['ip']}")
+            print(f"Scanning device {device['Inventory Type']} with IP {device['ip']}")
 
             # Default device information
             device_metadata_information = {
@@ -168,11 +169,11 @@ class ScnDevicesDb:
                         "DviceType": "Unknown"
             }
 
-            if device["hostname"] in DevicePluginsPool["DevicePluginsPool"].keys(): # Plugins are available for the device
-                devicePluginFilePath = DevicePluginsPool["DevicePluginsPool"][device["hostname"]]
+            if device["Inventory Type"] in DevicePluginsPool["DevicePluginsPool"].keys(): # Plugins are available for the device
+                devicePluginFilePath = DevicePluginsPool["DevicePluginsPool"][device["Inventory Type"]]
                 try:
-                    # DevicePluginsPool[device["hostname"]] is library path to the device plugin
-                    # Example: DevicePluginsPool[device["hostname"]] = "/data/scn_discovery/vendor_plugins/mds.py"
+                    # DevicePluginsPool[device["Inventory Type"]] is library path to the device plugin
+                    # Example: DevicePluginsPool[device["Inventory Type"]] = "/data/scn_discovery/vendor_plugins/mds.py"
                     # Import the module and create an object of the class
                     # Import module dynamically using importlib
                     #module = importlib.import_module(devicePluginFilePath)
@@ -190,16 +191,16 @@ class ScnDevicesDb:
 
 
                 except Exception as e:
-                    print(f"Error loading plugin for {device['hostname']}")
+                    print(f"Error loading plugin for {device['Inventory Type']}")
                     print("Error: ", e)
 
             else: # For generic devices
-                if device["hostname"] in device_ssh_details.keys():
+                if device["Inventory Type"] in device_ssh_details.keys():
                     device_metadata_information_list = self.__getGenericDegiveInfo(device,SerialNum)
                     SerialNum += len(device_metadata_information_list)
                     self.devices_meta_data.extend(device_metadata_information_list.copy())
                 else:
-                    logger.error("No SSH details available for %s, %s", device["ip"], device["hostname"])
+                    logger.error("No SSH details available for %s, %s", device["ip"], device["Inventory Type"])
                     self.devices_meta_data.append(device_metadata_information.copy())
 
 

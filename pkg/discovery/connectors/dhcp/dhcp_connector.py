@@ -10,6 +10,7 @@ import os
 import json
 from paramiko import SSHClient, AutoAddPolicy, SFTPClient
 from datetime import datetime
+import time
 
 # Constants
 CWD = os.path.dirname(os.path.abspath(__file__))
@@ -35,7 +36,7 @@ def fetch_dhcp_leases_via_ssh(dhcp_server_ip, username, password, remote_path="/
         # Use SFTP to download the lease file
         sftp = client.open_sftp()
         print(f"Fetching lease file from {remote_path}...")
-        sftp.get(remote_path, local_path)
+        sftp.get(remote_path, local_path) 
         sftp.close()
         client.close()
 
@@ -58,16 +59,19 @@ def parse_dhcp_leases(lease_file="dhcpd.leases"):
             #leases = re.findall(r"\nlease (.*?) {.*?starts \d (.*?);.*?ends \d (.*?);.*?hardware ethernet (.*?);.*?client-hostname \"(.*?)\";", content, re.DOTALL)
             #leases = re.findall(r"lease (.*?) {\s.*?starts \d (.*?);\s.*?ends \d (.*?);.*", content, re.DOTALL)
             #leases = re.findall(r"lease\s(?P<ip>\d+\.\d+\.\d+\.\d+)\s\{[\s\S]*?starts\s\d\s(?P<start_time>[\d\/\:\s]+);[\s\S]*?ends\s\d\s(?P<end_time>[\d\/\:\s]+);[\s\S]*?hardware\s\w+\s(?P<mac>[a-fA-F0-9:]+);(?:[\s\S]*?client-hostname\s\"(?P<hostname>.*?)\";)?", content, re.DOTALL)
-            leases = re.findall(r'lease\s(?P<ip>\d+\.\d+\.\d+\.\d+)\s\{[\s\S]*?starts\s\d\s(?P<start_time>[\d\/\:\s]+);[\s\S]*?ends\s\d\s(?P<end_time>[\d\/\:\s]+);[\s\S]*?hardware\s\w+\s(?P<mac>[a-fA-F0-9:]+);(?:[\s\S]*?client-hostname\s\"(?P<hostname>.*?)\";)?', content, re.DOTALL)
+            #leases = re.findall(r'lease\s(?P<ip>\d+\.\d+\.\d+\.\d+)\s\{[\s\S]*?starts\s\d\s(?P<start_time>[\d\/\:\s]+);[\s\S]*?ends\s\d\s(?P<end_time>[\d\/\:\s]+);[\s\S]*?hardware\s\w+\s(?P<mac>[a-fA-F0-9:]+);(?:[\s\S]*?client-hostname\s\"(?P<hostname>.*?)\";)?', content, re.DOTALL)
+            leases = re.findall(r'lease\s(?P<ip>\d+\.\d+\.\d+\.\d+)\s\{[\s\S]*?starts\s\d\s(?P<start_time>[\d\/\:\s]+);[\s\S]*?ends\s\d\s(?P<end_time>[\d\/\:\s]+);[\s\S]*?hardware\s\w+\s(?P<mac>[a-fA-F0-9:]+);(?:[\s\S]*?set vendor-class-identifier\s*=\s\"(?P<inventory_type>.*?)\";)?', content, re.DOTALL)
+
             #list(map(print, leases))
             for lease in leases:
+                print(lease)
                 if len(lease) == 5:
-                    ip, start_time, stop_time, mac, hostname = lease
+                    ip, start_time, stop_time, mac, inventory_type = lease
                 else:
-                    ip, mac, hostname = lease
+                    ip, mac, inventory_type = lease
                     start_time = "N/A"
                     stop_time = "N/A"
-                devices.append({"ip": ip.strip(), "mac": mac.strip(), "hostname": hostname.strip(),
+                devices.append({"ip": ip.strip(), "mac": mac.strip(), "Inventory Type": inventory_type.strip(),
                 "start_time": start_time.strip(), "stop_time": stop_time.strip()})
     except Exception as e:
         print(f"Error parsing DHCP lease file: {e}")

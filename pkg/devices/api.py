@@ -382,7 +382,7 @@ class dhcp_service_stop(Resource):
 class upload(Resource):
     def post(self):
             #Loads data from the Recommendations file
-        print("Headers ----> : ", request.headers)
+        logger.debug("Headers ----> : ", request.headers)
         return
 
         

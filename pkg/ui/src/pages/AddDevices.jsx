@@ -1,5 +1,5 @@
-// AddDevices.js
 import React, { useState } from 'react';
+import { toast } from "react-toastify"; 
 
 const AddDevices = () => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -10,14 +10,13 @@ const AddDevices = () => {
 
   const handleUpload = () => {
     if (!selectedFile) {
-      alert('Please select a file first.');
+      toast.error('Please select a file first.');
       return;
     }
 
     const formData = new FormData();
     formData.append('file', selectedFile);
 
-    // Replace with your actual upload URL
     fetch('/device-upload', {
       method: 'POST',
       body: formData,
@@ -29,33 +28,42 @@ const AddDevices = () => {
         return response.json();
       })
       .then((data) => {
-        alert('File uploaded successfully!');
-        // Handle success response
+        toast.success('File uploaded successfully!');
       })
       .catch((error) => {
-        alert(`Error: ${error.message}`);
-        // Handle error response
+        toast.error(`Error: ${error.message}`);
       });
   };
 
   return (
-    <div className="h-screen bg-[#FBE7CC] p-6 flex flex-col items-center">
-      <h1 className="text-2xl p-2 font-bold">Add Devices</h1>
-      <p className="text-sm md:text-base mb-4">
+    <div className="min-h-screen bg-[#FBE7CC] p-6 flex flex-col items-center">
+      <h1 className="text-2xl lg:text-3xl p-2 font-bold">Add Devices</h1>
+      <p className="text-sm md:text-base lg:text-lg mb-4 text-center max-w-md">
         Upload a file to add devices.
       </p>
-      <div className="w-full max-w-md bg-orange-100 p-4 shadow rounded-lg">
+
+      <div className="w-full max-w-screen-md bg-orange-100 p-6 shadow rounded-lg">
         <input
           type="file"
           onChange={handleFileChange}
-          className="w-full p-2 border border-gray-300 rounded mb-4"
+          className="w-full p-3 border border-gray-300 rounded mb-4 text-sm md:text-base"
         />
-        <button
-          onClick={handleUpload}
-          className="bg-orange-400 text-white px-4 py-2 rounded hover:bg-orange-500 transition"
-        >
-          Upload
-        </button>
+        
+        {/* Button Wrapper for Flexbox Responsiveness */}
+        <div className="flex flex-wrap justify-center gap-4">
+          <button
+            onClick={handleUpload}
+            className="bg-orange-400 text-white px-5 py-2 rounded hover:bg-orange-500 transition text-sm md:text-base"
+          >
+            Upload
+          </button>
+          <button
+            onClick={() => console.log("OK Button Clicked")}
+            className="bg-orange-400 text-white px-5 py-2 rounded hover:bg-orange-500 transition text-sm md:text-base"
+          >
+            OK
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -34,7 +34,7 @@ const UseCases = () => {
         Provides the supported use cases for deployment
       </p>
 
-      <div className="w-full max-w-7xl overflow-hidden">
+      <div className="w-full max-w-10xl overflow-hidden">
         <div className="overflow-y-auto max-h-[500px] border border-gray-300 rounded-lg shadow">
           <table className="table-auto w-full text-left border-collapse">
             <thead className="bg-orange-400 text-white sticky top-0">

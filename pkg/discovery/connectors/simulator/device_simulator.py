@@ -18,6 +18,6 @@ def scan_devices():
         return []
 
     # from df chose rows randomly
-    df2 = df.sample(frac=0.3)
-    json_data = df2.to_dict(orient='records')
+    #df2 = df.sample(frac=0.3)
+    json_data = df.to_dict(orient='records')
     return json_data

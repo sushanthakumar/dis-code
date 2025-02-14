@@ -12,19 +12,29 @@ const DhcpServer = () => {
 
   const handleUpload = async () => {
     if (!file) {
-        toast.warn('Please select a file to upload.');
+      toast.warn('Please select a file to upload.');
       return;
     }
-
+  
     const formData = new FormData();
     formData.append('file', file);
-
+  
+    // Log the FormData contents
+    console.log("Uploading File Details:");
+    for (const [key, value] of formData.entries()) {
+      if (value instanceof File) {
+        console.log(`Key: ${key}, Name: ${value.name}, Size: ${value.size} bytes, Type: ${value.type}`);
+      } else {
+        console.log(`Key: ${key}, Value: ${value}`);
+      }
+    }
+  
     try {
       const response = await fetch('/dhcp-server-upload', {
         method: 'POST',
         body: formData,
       });
-
+  
       if (response.ok) {
         toast.success('File uploaded successfully.');
       } else {
@@ -35,7 +45,7 @@ const DhcpServer = () => {
       toast.error('An error occurred during file upload.');
     }
   };
-
+  
   const handleStart = async () => {
     try {
       const response = await fetch('http://127.0.0.1:5000/v1/dhcpservice/start', {

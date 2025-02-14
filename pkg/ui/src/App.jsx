@@ -10,8 +10,8 @@ import DhcpServer from "./pages/DhcpServer";
 import DhcpHost from "./pages/DhcpHost";
 import AddDevices from "./pages/AddDevices";
 import { fetchTags } from "./store/store";
-import { ToastContainer } from "react-toastify"; // Import ToastContainer
-import "react-toastify/dist/ReactToastify.css"; // Import toast styles
+import { ToastContainer } from "react-toastify"; 
+import "react-toastify/dist/ReactToastify.css"; 
 
 const App = () => {
   const dispatch = useDispatch();
@@ -34,7 +34,7 @@ const App = () => {
           <Route path="/settings/AddDevices" element={<AddDevices />} />
         </Routes>
       </div>
-      {/* Add ToastContainer here to show toast notifications globally */}
+      
       <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} />
     </div>
   );

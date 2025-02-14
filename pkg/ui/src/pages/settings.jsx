@@ -96,7 +96,7 @@ const Settings = () => {
   return (
     <div className="h-screen bg-[#FBE7CC] p-6 flex flex-col items-center">
       <h1 className="text-2xl p-2 font-bold">Tags</h1>
-      <p className="text-sm md:text-base mb-4">
+      <p className="text-sm md:text-base mb-4 text-center max-w-md">
         Create custom groups through tags. This will be used to group devices.
       </p>
 
@@ -113,7 +113,7 @@ const Settings = () => {
             type="text"
             value={key}
             onChange={(e) => setKey(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-400"
             placeholder="Enter tag key"
           />
         </div>
@@ -126,7 +126,7 @@ const Settings = () => {
             type="text"
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-400"
             placeholder="Enter tag value"
           />
         </div>
@@ -143,7 +143,7 @@ const Settings = () => {
           List of Available Tags
         </h2>
         {tags.length === 0 ? (
-          <p className="bg-white">No tags created yet.</p>
+          <p className="bg-white p-2 rounded text-gray-700 text-center">No tags created yet.</p>
         ) : (
           <ul className="space-y-4">
             {tags.map((tag) => (

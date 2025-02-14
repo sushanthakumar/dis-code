@@ -2,7 +2,8 @@
     "DevicePluginsPool": {
         "MDS": "mds.py",
         "MikroTik": "mikrotik.py",
-        "Cisco": "cisco.py",
+        "cisco MDS - tcl": "mds.py",
+        "Cisco UCS-FI-6454": "n9k.py",
         "Juniper": "juniper.py"
     }
 }

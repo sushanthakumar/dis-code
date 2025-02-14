@@ -167,11 +167,11 @@ const Discovery = () => {
   }, [reduxDispatch]);
 
   useEffect(() => {
-    fetchTags(); // Just call the function, don't dispatch it
+    fetchTags(); 
   }, [fetchTags]);
   
   
-  // Combined API calls: Run fetchTags and trigger scan concurrently, then fetch devices
+  
   useEffect(() => {
     const fetchData = async () => {
       localDispatch({ type: "SET_LOADING", payload: true });
@@ -190,7 +190,10 @@ const Discovery = () => {
         if (!listResponse.ok)
           throw new Error(`List Error: ${listResponse.statusText}`);
         const listData = await listResponse.json();
-        console.log("List API Response:", listData);
+        
+      console.log("Raw List API Response:", listData);
+      console.log("Total Items Received:", listData.length);
+
         localDispatch({ type: "SET_DEVICES", payload: listData });
       } catch (err) {
         localDispatch({ type: "SET_ERROR", payload: err.message });
@@ -202,7 +205,7 @@ const Discovery = () => {
     fetchData();
   }, [fetchTags]);
 
-  // Memoized handlers and callbacks
+  
   const handleTagAssign = useCallback(async (deviceId, tagKeyValue) => {
     try {
       console.log("Assigning tag:", { deviceId, tagKeyValue });
@@ -349,85 +352,81 @@ const Discovery = () => {
 
   const getFilteredDevices = useMemo(() => {
     let devicesToFilter = state.devices;
+    console.log("Before Inventory Type Filter:", devicesToFilter.length);
+
+    if (state.activeTab === "discovered") {
+      console.log("Discovered Devices Tab Active: Returning All Devices");
+      return devicesToFilter;
+  }
     if (state.groupTab === "switches") {
-      devicesToFilter = state.devices.filter(
+      devicesToFilter = devicesToFilter.filter(
         (device) =>
           device["Inventory_Type"] === "MDS" ||
           device["Inventory_Type"] === "Nexus 9K"
       );
+      console.log("After Switches Filter:", devicesToFilter.length);
     } else if (state.groupTab === "fabricInterconnect") {
-      devicesToFilter = state.devices.filter(
+      devicesToFilter = devicesToFilter.filter(
         (device) => device["Inventory_Type"] === "Fabric Interconnect"
       );
+      console.log("After Fabric Interconnect Filter:", devicesToFilter.length);
     } else if (state.groupTab === "storages") {
-      devicesToFilter = state.devices.filter(
+      devicesToFilter = devicesToFilter.filter(
         (device) => device["Inventory_Type"] === "Flash Array"
       );
+      console.log("After Storage Filter:", devicesToFilter.length);
     }
+
+   
     return devicesToFilter;
-  }, [state.devices, state.groupTab]);
+}, [state.devices, state.groupTab,state.activeTab]);
 
-  const paginatedDevices = useMemo(() => {
-    return state.devices.slice(
-      (state.currentPage - 1) * state.itemsPerPage,
-      state.currentPage * state.itemsPerPage
-    );
-  }, [state.devices, state.currentPage, state.itemsPerPage]);
+const filteredDevices = useMemo(() => {
+    let devicesToDisplay = getFilteredDevices; 
+    console.log("After getFilteredDevices:", devicesToDisplay.length);
 
-  const filteredDevices = useMemo(() => {
-    let devicesToDisplay = getFilteredDevices; // Use the pre-filtered list
-  
-    // Apply search filtering (for discovered tab)
-    if (state.activeTab === "discovered") {
+    if (state.activeTab === "discovered" && state.searchInput) {
       devicesToDisplay = devicesToDisplay.filter((device) =>
         Object.values(device)
           .join(" ")
           .toLowerCase()
           .includes(state.searchInput.toLowerCase())
       );
+      console.log("After Search Filter:", devicesToDisplay.length);
     }
-  
-    // Apply tag filtering
-    console.log("Active Tag Filter:", state.activeTagFilter);
 
-if (state.activeTagFilter && typeof state.activeTagFilter === "string") {
-  devicesToDisplay = devicesToDisplay.filter((device) => {
-    let tagsObj = {};
+    if (state.activeTagFilter && typeof state.activeTagFilter === "string") {
+      devicesToDisplay = devicesToDisplay.filter((device) => {
+        let tagsObj = {};
+        try {
+          const parsedTags = JSON.parse(device.Tags || "[]");
 
-    try {
-      // Parse the Tags field, which is an array of JSON strings
-      const parsedTags = JSON.parse(device.Tags || "[]");
+          if (Array.isArray(parsedTags)) {
+            tagsObj = parsedTags.reduce((acc, tag) => {
+              return { ...acc, ...JSON.parse(tag) };
+            }, {});
+          }
 
-      if (Array.isArray(parsedTags)) {
-        // Merge all parsed objects into a single object
-        tagsObj = parsedTags.reduce((acc, tag) => {
-          return { ...acc, ...JSON.parse(tag) }; // Parse each string and merge
-        }, {});
-      }
+          const formattedTags = Object.entries(tagsObj)
+            .map(([key, value]) => `${key}:${value}`)
+            .join(", ");
 
-      // Convert the merged object into "key:value" format
-      const formattedTags = Object.entries(tagsObj)
-        .map(([key, value]) => `${key}:${value}`)
-        .join(", ");
+          return formattedTags.toLowerCase().includes(state.activeTagFilter.toLowerCase());
+        } catch (error) {
+          console.error("Error parsing Tags for device:", device, error);
+          return false;
+        }
+      });
 
-      // Check if the active tag filter matches any part of the formatted string
-      return formattedTags.toLowerCase().includes(state.activeTagFilter.toLowerCase());
-    } catch (error) {
-      console.error("Error parsing Tags for device:", device, error);
-      return false; // Skip this device if Tags parsing fails
+      console.log("After Tag Filter:", devicesToDisplay.length);
     }
-  });
 
-  console.log("Filtered Devices:", devicesToDisplay);
-}
-
-    
-    // Apply pagination
+    console.log("Final Devices Displayed:", devicesToDisplay.length);
     return devicesToDisplay.slice(
       (state.currentPage - 1) * state.itemsPerPage,
       state.currentPage * state.itemsPerPage
     );
-  }, [
+}, [
     state.devices,
     state.activeTab,
     state.searchInput,
@@ -435,7 +434,9 @@ if (state.activeTagFilter && typeof state.activeTagFilter === "string") {
     state.activeTagFilter,
     state.currentPage,
     state.itemsPerPage,
-  ]);
+]);
+
+
   
   
   const handleTagSelectionChange = useCallback(
@@ -475,14 +476,14 @@ if (state.activeTagFilter && typeof state.activeTagFilter === "string") {
   }
 
   return (
-    <div className="flex-1 flex flex-col min-h-[calc(100vh-100px)]">
+    <div className="flex-1 flex flex-col min-h-[calc(100vh-100px)] p-4 md:p-6">
       {state.notification && (
         <div className="fixed top-4 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-green-100 text-green-800 px-4 py-2 rounded flex items-center shadow-lg z-50">
           <FaCheckCircle className="mr-2" />
           <span>{state.notification}</span>
         </div>
       )}
-      <div className="bg-[#fbe3c1] flex-1 overflow-auto p-6 flex flex-col items-center">
+      
         <div className="absolute top-4 right-4 md:top-10 md:right-10 flex space-x-2 md:space-x-4">
           <button
             className="bg-[#fbb03b] text-white p-2 md:p-3 rounded-full shadow-md hover:scale-110 transition duration-200"
@@ -507,14 +508,15 @@ if (state.activeTagFilter && typeof state.activeTagFilter === "string") {
           </button>
         </div>
 
-        <div className="w-full max-w-7xl px-0 md:px-4">
+        <div className="w-full max-w-10xl px-0 md:px-4">
           <h1 className="text-xl md:text-2xl font-bold text-[#020a07] mb-2 md:mb-4 mt-4">
             Discovery
           </h1>
           <p className="text-sm md:text-base">
             Discovered Devices and Information View
           </p>
-          <div className="flex flex-col md:flex-row items-center justify-between bg-[#fbe3c1] py-2 md:py-4 px-0">
+        </div>
+        <div className="w-full max-w-10xl flex flex-col md:flex-row items-center justify-between bg-[#fbe3c1] py-2 md:py-4 px-0">
             <div className="flex">
               <button
                 className={`px-4 md:px-6 py-1 md:py-2 ${
@@ -549,14 +551,16 @@ if (state.activeTagFilter && typeof state.activeTagFilter === "string") {
               Check Health
             </button>
           </div>
-        </div>
+        
 
-        <div className="w-full max-w-7xl flex-1 h-full overflow-hidden px-2 md:px-4">
-          <div className="overflow-hidden sticky top-0 z-10 border border-gray-300 rounded-lg shadow">
+        <div className="w-full max-w-10xl flex-1 h-full overflow-hidden px-2 lg:px-8">
+        <div className="flex flex-col min-h-[calc(100vh-HEADER_HEIGHT)]">
+          <div className="overflow-auto flex-grow sticky top-0 z-10 ">
             {state.activeTab === "discovered" && (
               <>
-                <div className="overflow-auto max-h-[350px] border-t border-gray-300">
-                  <table className="table-auto w-full text-left border-collapse">
+              <div className="w-full overflow-x-auto">
+                <div className="md:max-h-[60vh] sm:max-h-[60vh] max-h-[60vh] overflow-y-auto border-t border-gray-300 xl:w-full w-full">
+                  <table className="w-full text-left border-collapse">
                     <thead className="bg-orange-400 text-white sticky top-0 z-10">
                       <tr>
                         <th className="border px-2 md:px-3 py-1 md:py-2">
@@ -830,6 +834,7 @@ if (state.activeTagFilter && typeof state.activeTagFilter === "string") {
                     </tbody>
                   </table>
                 </div>
+                </div>
               </>
             )}
             {state.activeTab === "grouping" && (
@@ -871,7 +876,8 @@ if (state.activeTagFilter && typeof state.activeTagFilter === "string") {
                     {state.groupTab} Devices
                   </h2>
                 </div>
-                <div className="overflow-y-auto max-h-[220px] border-t border-gray-300">
+                <div className="w-full overflow-x-auto">
+                <div className="md:max-h-[40vh] max-h-[40vh] overflow-y-auto border-t border-gray-300 xl:w-full w-full">
                   <table className="table-auto w-full text-left border-collapse">
                     <thead className="bg-orange-400 text-white sticky top-0">
                       <tr>
@@ -1037,20 +1043,16 @@ if (state.activeTagFilter && typeof state.activeTagFilter === "string") {
                     </tbody>
                   </table>
                 </div>
+                </div>
               </div>
             )}
           </div>
         </div>
 
-        <div className="w-full max-w-7xl flex flex-col md:flex-row items-center justify-between bg-[#fbe3c1] py-4 md:py-4 px-4">
+        <div className="w-full max-w-10xl flex flex-row items-center justify-between bg-[#fbe3c1] py-4 px-4">
           <div>
             <label htmlFor="itemsPerPage" className=""></label>
-            <select
-              id="itemsPerPage"
-              className="border rounded px-2 py-1 bg-orange-400 text-white hover:bg-orange-500 transition"
-              value={state.itemsPerPage}
-              onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-            >
+            <select id="itemsPerPage" className="border rounded px-2 py-1 bg-orange-400 text-white hover:bg-orange-500 transition" value={state.itemsPerPage} onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}>
               <option value={10}>10</option>
               <option value={20}>20</option>
               <option value={30}>30</option>
@@ -1058,22 +1060,12 @@ if (state.activeTagFilter && typeof state.activeTagFilter === "string") {
             </select>
           </div>
           <div className="flex space-x-2 items-center">
-            <button
-              className="w-8 h-8 bg-orange-400 text-white rounded-full flex items-center justify-center hover:bg-orange-500 transition"
-              onClick={handlePreviousPage}
-            >
-              ❮
-            </button>
-            <button
-              className="w-8 h-8 bg-orange-400 text-white rounded-full flex items-center justify-center hover:bg-orange-500 transition"
-              onClick={handleNextPage}
-              disabled={state.currentPage === totalPages}
-            >
-              ❯
-            </button>
+            <button className="w-8 h-8 bg-orange-400 text-white rounded-full flex items-center justify-center hover:bg-orange-500 transition" onClick={handlePreviousPage}>❮</button>
+            <button className="w-8 h-8 bg-orange-400 text-white rounded-full flex items-center justify-center hover:bg-orange-500 transition" onClick={handleNextPage} disabled={state.currentPage === totalPages}>❯</button>
           </div>
         </div>
       </div>
+      
     </div>
   );
 };

@@ -44,7 +44,7 @@ class DeviceInfo(DeviceInfoPlugin):
             ssh = SSHClient()
             ssh.load_system_host_keys()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            ssh.connect(ip, username=ssh_details["username"], password=ssh_details["password"], port=ssh_details["port"])
+            ssh.connect(ip, username=ssh_details["username"], password=ssh_details["password"], port=ssh_details["port"], timeout=5)
 
             # Get the device information from the MDS
             for key, value in param_against_file.items():
@@ -58,9 +58,13 @@ class DeviceInfo(DeviceInfoPlugin):
                 else:
                     deviceInfo[key] = None
             ssh.close()
+            deviceInfo["Vendor Name"] = "Cisco"
         except Exception as e:
             print(f"Error in getting device information: {e}")
             return None
+
+        print("Getting metadata info...from mds.py")
+        print(deviceInfo)
         
     def healthcheck(self, deviceInfo):
         """Perform a ping test to check device health."""
