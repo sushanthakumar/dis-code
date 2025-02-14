@@ -24,7 +24,7 @@ REPETITIONS = 10
 
 
 # Function to fetch the DHCP lease file from the DHCP server
-def fetch_dhcp_leases_via_ssh(dhcp_server_ip, username, password, remote_path="/var/lib/dhcpd/dhcpd.leases", local_path="dhcpd.leases", port=2222):
+def fetch_dhcp_leases_via_ssh(dhcp_server_ip, username, password, remote_path="/var/lib/dhcp/dhcpd.leases", local_path="dhcpd.leases", port=2222):
     """Fetches the DHCP lease file from a remote DHCP server using SSH."""
     print("Fetching DHCP lease file from the DHCP server.")
     try:
