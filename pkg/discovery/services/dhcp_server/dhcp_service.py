@@ -7,6 +7,7 @@ import pandas as pd
 import paramiko
 import json
 from utils.scn_log import logger
+import sys
  
 # Get CWD using os with 
 CWD = os.path.dirname(os.path.abspath(__file__))
@@ -39,11 +40,7 @@ class DHCPService:
             self.client = paramiko.SSHClient()
             self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             self.service_name = dhcp_details["service_name"]
-            # self.client.connect("192.168.10.1", 
-            #                     port=22, 
-            #                     username="vagrant", 
-            #                     password="vagrant", 
-            #                     timeout=10)
+
             self.client.connect(dhcp_details["ip"], 
                                 port=dhcp_details["port"], 
                                 username=dhcp_details["username"], 
@@ -86,6 +83,7 @@ class DHCPService:
             state = sftp_obj.put(DHCPD_CONFIG_FILE, TEMP_REMOTE_PATH)
             
             print(f"File transfer successful. Remote file attributes: {state}")
+            sys.stdout.flush()
 
             # Close SFTP connection
             sftp_obj.close()
@@ -104,6 +102,7 @@ class DHCPService:
 
         except Exception as e:
             print(f"Error copying the DHCP configuration file: {e}")
+            sys.stdout.flush()           
             return
             
         # Execute the command to start the DHCP server
@@ -118,6 +117,7 @@ class DHCPService:
         # Execute the command to stop the DHCP server
         self.__execute_command(f"sudo systemctl stop {self.service_name}")
         print(f"{self.service_name} service stopped successfully.")
+        sys.stdout.flush()
 
     # Define a method to check the status of the DHCP server
     def status(self):
@@ -126,5 +126,4 @@ class DHCPService:
         # Execute the command to check the status of the DHCP server
         self.__execute_command(f"systemctl status {self.service_name}")
         print(f"{self.service_name} service is running.")
-
-        
+        sys.stdout.flush()        

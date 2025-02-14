@@ -157,7 +157,7 @@ class ScnDevicesDb:
 
             # Default device information
             device_metadata_information = {
-                        'Inventory Type': 'Unknown',
+                        'Inventory Type': device["Inventory Type"],
                         'Serial ID': SerialNum,
                         'Vendor Name': 'Unknown',
                         'IP Address': device["ip"],

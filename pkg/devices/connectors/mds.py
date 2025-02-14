@@ -14,15 +14,9 @@ from ping3 import ping
 
 # Define the parameters to be fetched from the devices using SSH, and the corresponding commands and regex patterns
 param_against_file ={
-    "Inventory Type": {"cmd": "cat /proc/cpuinfo", "regex":r"vendor_id\s+:(.*)"},
-    "Vendor Name": {"cmd": "/proc/cpuinfo", "regex":r"vendor_id\s+:(.*)"},    
-    "IP Address": {"cmd": "IP_Address", "regex":r"(.*)"},
-    "DHCP Lease": {"cmd": "DHCP_Lease", "regex":r"(.*)"},
-    "DHCP Options": {"cmd": "DHCP_Options", "regex":r"(.*)"},
     "Firmware Version": {"cmd": "Firmware_Version", "regex":r"(.*)"},
     "Software Version": {"cmd": "show version", "regex":r'version\s+(\d+\.\d+\(\d+\))'},
     "Hardware Model": {"cmd": "cat /proc/cpuinfo", "regex":r"model name\s+:(.*)"},
-    "Serial ID": {"cmd": "Serial_ID", "regex":r"(.*)"}
 }
 
 ssh_details = {
