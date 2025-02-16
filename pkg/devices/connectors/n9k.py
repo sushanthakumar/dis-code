@@ -38,7 +38,6 @@ class DeviceInfo(DeviceInfoPlugin):
             ssh.load_system_host_keys()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             status = ssh.connect(ip, username=ssh_details["username"], password=ssh_details["password"], port=ssh_details["port"], timeout=5)
-            print(f"n9k: SSH status: {status}")
             sys.stdout.flush()
 
             # Get the device information from the MDS
@@ -49,9 +48,8 @@ class DeviceInfo(DeviceInfoPlugin):
                 sys.stdout.flush()
                 # Update the deviceInfo with the fetched information or add None if not found
                 if re.search(value["regex"], output,  re.IGNORECASE | re.DOTALL):
-                    # Update key value in deviceInfo with the fetched value if key is not there, add it
-                    if key not in deviceInfo:
-                        deviceInfo[key] = re.search(value["regex"], output,  re.IGNORECASE | re.DOTALL).group(1)
+                    # Update key value in deviceInfo with the fetched value
+                    deviceInfo[key] = re.search(value["regex"], output,  re.IGNORECASE | re.DOTALL).group(1)
                 else:
                     deviceInfo[key] = None
             deviceInfo["Vendor Name"] = "Cisco"

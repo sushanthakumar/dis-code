@@ -16,35 +16,27 @@ const DhcpServer = () => {
       return;
     }
   
-    const formData = new FormData();
-    formData.append('file', file);
-  
-    // Log the FormData contents
-    console.log("Uploading File Details:");
-    for (const [key, value] of formData.entries()) {
-      if (value instanceof File) {
-        console.log(`Key: ${key}, Name: ${value.name}, Size: ${value.size} bytes, Type: ${value.type}`);
-      } else {
-        console.log(`Key: ${key}, Value: ${value}`);
-      }
-    }
-  
     try {
       const response = await fetch('/dhcp-server-upload', {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': file.type || 'application/octet-stream', 
+          'X-File-Name': file.name, // Send filename in header
+        },
+        body: await file.arrayBuffer(), // Send raw file content
       });
   
       if (response.ok) {
         toast.success('File uploaded successfully.');
       } else {
-        alert('File upload failed.');
+        toast.error('File upload failed.');
       }
     } catch (error) {
       console.error('Error uploading file:', error);
       toast.error('An error occurred during file upload.');
     }
   };
+  
   
   const handleStart = async () => {
     try {
@@ -84,8 +76,8 @@ const DhcpServer = () => {
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-[#FBE7CC]">
-      <div className="bg-orange-100 shadow-lg rounded-lg p-6 w-full max-w-lg">
-        <h2 className="text-2xl font-bold mb-4 text-center">DHCP Server</h2>
+      <div className="bg-orange-100 w-full max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl p-6 md:p-8 rounded-2xl shadow-lg transition-all">
+        <h2 className="text-2xl md:text-3xl font-semibold text-gray-800 text-center">DHCP Server</h2>
         
         <div className="mb-6">
           <input type="file" onChange={handleFileChange} className="block w-full border p-2 rounded focus:outline focus:outline-black" />

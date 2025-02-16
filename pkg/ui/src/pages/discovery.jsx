@@ -476,7 +476,7 @@ const filteredDevices = useMemo(() => {
   }
 
   return (
-    <div className="flex-1 flex flex-col min-h-[calc(100vh-100px)] p-4 md:p-6">
+    <div className="flex-1 flex flex-col min-h-screen p-4 md:p-6">
       {state.notification && (
         <div className="fixed top-4 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-green-100 text-green-800 px-4 py-2 rounded flex items-center shadow-lg z-50">
           <FaCheckCircle className="mr-2" />
@@ -508,7 +508,7 @@ const filteredDevices = useMemo(() => {
           </button>
         </div>
 
-        <div className="w-full max-w-10xl px-0 md:px-4">
+        <div className="w-full max-w-10xl px-0 md:px-2">
           <h1 className="text-xl md:text-2xl font-bold text-[#020a07] mb-2 md:mb-4 mt-4">
             Discovery
           </h1>
@@ -516,10 +516,10 @@ const filteredDevices = useMemo(() => {
             Discovered Devices and Information View
           </p>
         </div>
-        <div className="w-full max-w-10xl flex flex-col md:flex-row items-center justify-between bg-[#fbe3c1] py-2 md:py-4 px-0">
+        <div className="w-full max-w-10xl flex flex-col md:flex-row items-center justify-between bg-[#fbe3c1] py-2 md:py-4 px-0 pl-2">
             <div className="flex">
               <button
-                className={`px-4 md:px-6 py-1 md:py-2 ${
+                className={`px-2 md:px-2 py-1 md:py-2 ${
                   state.activeTab === "discovered"
                     ? "bg-orange-400 text-white"
                     : "bg-white"
@@ -529,7 +529,7 @@ const filteredDevices = useMemo(() => {
                 Discovered Devices
               </button>
               <button
-                className={`px-4 md:px-6 py-1 md:py-2 ${
+                className={`px-2 md:px-2 py-1 md:py-2 ${
                   state.activeTab === "grouping"
                     ? "bg-orange-400 text-white"
                     : "bg-white"
@@ -542,7 +542,7 @@ const filteredDevices = useMemo(() => {
             <button
               onClick={handleHealthCheck}
               disabled={!state.selectedDeviceId}
-              className={`mt-2 md:mt-0 px-3 md:px-4 py-1 md:py-2 rounded text-sm md:text-base ${
+              className={`mt-2 md:mt-0 px-2 md:px-3 py-1 md:py-2 rounded text-sm md:text-base ${
                 state.selectedDeviceId
                   ? "bg-orange-400 text-white"
                   : "bg-orange-100 cursor-not-allowed"
@@ -553,13 +553,13 @@ const filteredDevices = useMemo(() => {
           </div>
         
 
-        <div className="w-full max-w-10xl flex-1 h-full overflow-hidden px-2 lg:px-8">
+        <div className="w-full max-w-10xl flex-1 h-full overflow-hidden px-0 lg:px-4 text-sm ">
         <div className="flex flex-col min-h-[calc(100vh-HEADER_HEIGHT)]">
           <div className="overflow-auto flex-grow sticky top-0 z-10 ">
             {state.activeTab === "discovered" && (
               <>
               <div className="w-full overflow-x-auto">
-                <div className="md:max-h-[60vh] sm:max-h-[60vh] max-h-[60vh] overflow-y-auto border-t border-gray-300 xl:w-full w-full">
+                <div className="md:max-h-[60vh] sm:max-h-[60vh] overflow-y-auto border-t border-gray-300 xl:w-full w-full h-full">
                   <table className="w-full text-left border-collapse">
                     <thead className="bg-orange-400 text-white sticky top-0 z-10">
                       <tr>
@@ -840,7 +840,7 @@ const filteredDevices = useMemo(() => {
             {state.activeTab === "grouping" && (
               <div className="flex flex-col">
                 <div className="sticky top-0 z-10 bg-[#fbe3c1]">
-                  <div className="flex justify-center mb-4 p-4">
+                  <div className="flex justify-center mt-1 mb-2 p-2">
                     <button
                       className={`px-4 py-2 ${
                         state.groupTab === "switches"
@@ -872,12 +872,10 @@ const filteredDevices = useMemo(() => {
                       Storages
                     </button>
                   </div>
-                  <h2 className="text-xl font-bold mb-4 px-4">
-                    {state.groupTab} Devices
-                  </h2>
+                  
                 </div>
                 <div className="w-full overflow-x-auto">
-                <div className="md:max-h-[40vh] max-h-[40vh] overflow-y-auto border-t border-gray-300 xl:w-full w-full">
+                <div className="md:max-h-[50vh] overflow-y-auto border-t border-gray-300 xl:w-full w-full h-full">
                   <table className="table-auto w-full text-left border-collapse">
                     <thead className="bg-orange-400 text-white sticky top-0">
                       <tr>
@@ -1049,7 +1047,7 @@ const filteredDevices = useMemo(() => {
           </div>
         </div>
 
-        <div className="w-full max-w-10xl flex flex-row items-center justify-between bg-[#fbe3c1] py-4 px-4">
+        <div className="w-full max-w-10xl flex flex-row items-center justify-between bg-[#fbe3c1] py-2 px-0">
           <div>
             <label htmlFor="itemsPerPage" className=""></label>
             <select id="itemsPerPage" className="border rounded px-2 py-1 bg-orange-400 text-white hover:bg-orange-500 transition" value={state.itemsPerPage} onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}>

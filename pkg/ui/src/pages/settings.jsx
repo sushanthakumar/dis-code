@@ -100,8 +100,8 @@ const Settings = () => {
         Create custom groups through tags. This will be used to group devices.
       </p>
 
-      <div className="w-full max-w-md bg-orange-100 p-4 shadow rounded-lg">
-        <h2 className="text-xl font-semibold text-gray-800 text-center mb-4">
+      <div className="bg-orange-100 w-full max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl p-4 md:p-6 rounded-2xl shadow-lg transition-all mb-2">
+        <h2 className="text-2xl md:text-3xl font-semibold text-gray-800 text-center">
           Create a new tag
         </h2>
         <div className="mb-4">
@@ -138,8 +138,8 @@ const Settings = () => {
         </button>
       </div>
 
-      <div className="w-full max-w-md overflow-auto bg-orange-100 p-4 shadow rounded-lg mt-6">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">
+      <div className="bg-orange-100 w-full max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl p-4 md:p-6 rounded-2xl shadow-lg transition-all">
+        <h2 className="text-2xl md:text-2xl font-semibold text-gray-800 text-center pb-2">
           List of Available Tags
         </h2>
         {tags.length === 0 ? (

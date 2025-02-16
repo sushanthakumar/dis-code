@@ -14,9 +14,8 @@ from ping3 import ping
 
 # Define the parameters to be fetched from the devices using SSH, and the corresponding commands and regex patterns
 param_against_file ={
-    "Firmware Version": {"cmd": "Firmware_Version", "regex":r"(.*)"},
-    "Software Version": {"cmd": "show version", "regex":r'NXOS:\s*version\s*([\d\.N\(\)a-zA-Z]+)'},
-    "Hardware Model": {"cmd": "cat /proc/cpuinfo", "regex":r"model name\s+:(.*)"}
+    "Software Version": {"cmd": "show version", "regex":r'NXOS:\s*version\s*([\d\.N\(\)a-zA-Z]+)'}
+    #"Hardware Model": {"cmd": "cat /proc/cpuinfo", "regex":r"model name\s+:(.*)"}
 }
 
 ssh_details = {
@@ -46,8 +45,7 @@ class DeviceInfo(DeviceInfoPlugin):
                 # Update the deviceInfo with the fetched information or add None if not found
                 if re.search(value["regex"], output,  re.IGNORECASE | re.DOTALL):
                     # Update key value in deviceInfo with the fetched value if key is not there, add it
-                    if key not in deviceInfo:
-                        deviceInfo[key] = re.search(value["regex"], output,  re.IGNORECASE | re.DOTALL).group(1)
+                    deviceInfo[key] = re.search(value["regex"], output,  re.IGNORECASE | re.DOTALL).group(1)
                 else:
                     deviceInfo[key] = None
             ssh.close()
