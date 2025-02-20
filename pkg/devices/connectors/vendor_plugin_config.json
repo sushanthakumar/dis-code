@@ -1,11 +1,9 @@
 {
     "DevicePluginsPool": {
-        "MDS": "mds.py",
-        "MikroTik": "mikrotik.py",
-        "cisco MDS - tcl": "mds.py",
-        "Cisco N9K-C9336C-FX2": "n9k.py",
-        "Cisco UCS-FI-6454": "fabricinterconnect.py",
-        "FlashArray": "flasharray.py",
-        "FlashArray": "flashblade.py"
-    }
+        "MDS": "cisco/mds.py",
+        "cisco MDS - tcl": "cisco/mds.py",
+        "Cisco UCS-FI-6454": "cisco/nexus.py",
+        "Juniper": "juniper.py"
+    },
+    "DefaultPlugin": "default_plugin.py"
 }

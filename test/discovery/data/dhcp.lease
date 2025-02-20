@@ -1,0 +1,50 @@
+# The format of this file is documented in the dhcpd.leases(5) manual page.
+# This lease file was written by isc-dhcp-4.4.1
+# authoring-byte-order entry is generated, DO NOT DELETE
+authoring-byte-order little-endian;
+lease 192.168.10.154 {
+  starts 4 2025/02/13 16:30:24;
+  ends 4 2025/02/13 17:30:24;
+  cltt 4 2025/02/13 16:30:24;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet 00:08:31:17:7c:f8;
+  uid "\000FDO26241HA2;Cisco UCS-FI-6454";
+  set vendor-class-identifier = "Cisco UCS-FI-6454";
+}
+lease 192.168.10.175 {
+  starts 4 2025/02/13 16:46:00;
+  ends 4 2025/02/13 17:46:00;
+  cltt 4 2025/02/13 16:46:05;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet 00:08:31:17:12:24;
+  uid "\000FDO26241H92;Cisco UCS-FI-6454";
+  set vendor-class-identifier = "Cisco UCS-FI-6454";
+}
+
+lease 192.168.10.152 {
+  starts 4 2025/02/13 16:55:40;
+  ends 4 2025/02/13 18:25:25;
+  cltt 4 2025/02/13 16:55:40;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet 88:fc:5d:27:01:a0;
+  uid "\000FD02630226Gmgmt0";
+  set vendor-class-identifier = "Cisco N9K-C9336C-FX2";
+}
+
+lease 192.168.10.152 {
+  starts 4 2025/02/17 16:55:40;
+  ends 4 2025/02/17 18:25:25;
+  cltt 4 2025/02/17 16:55:40;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet 88:fc:5d:27:01:a0;
+  uid "\000FD02630226Gmgmt0";
+  set vendor-class-identifier = "Cisco N9K-C9336C-FX2";
+}

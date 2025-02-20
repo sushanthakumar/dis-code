@@ -11,22 +11,27 @@ import re
 from paramiko import SSHClient
 from utils.scn_log import logger
 from ping3 import ping
+import json 
+
+CREDENTIALS_PATH = os.path.join(os.path.dirname(__file__), "./login_details/credentials.json")
 
 # Define the parameters to be fetched from the devices using SSH, and the corresponding commands and regex patterns
 param_against_file ={
+    "Firmware Version": {"cmd": "Firmware_Version", "regex":r"(.*)"},
     "Software Version": {"cmd": "show version", "regex":r'version\s+(\d+\.\d+\(\d+\))'},
-    # "Hardware Model": {"cmd": "cat /proc/cpuinfo", "regex":r"model name\s+:(.*)"}
+    "Hardware Model": {"cmd": "show version", "regex":r"Hardware\s*\n\s*(cisco\s+[\w\-]+(?:\s[\w\d\-]+)*)"},
 }
 
-ssh_details = {
-    "username": "admin",
-    "password": "admin",
-    "port": 22
-}
 
 class DeviceInfo(DeviceInfoPlugin):
     def __init__(self):
-        pass
+        with open(CREDENTIALS_PATH, 'r') as fd:
+            credentials = json.load(fd)
+        
+        self.user = credentials.get("mds").get("username")
+        self.password = credentials.get("mds").get("password")
+        self.port = credentials.get("mds").get("port")
+        
 
     def get_metadata_info(self, deviceInfo):
 
@@ -37,7 +42,7 @@ class DeviceInfo(DeviceInfoPlugin):
             ssh = SSHClient()
             ssh.load_system_host_keys()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            ssh.connect(ip, username=ssh_details["username"], password=ssh_details["password"], port=ssh_details["port"], timeout=5)
+            ssh.connect(ip, self.port, self.user, self.password, timeout=5)
 
             # Get the device information from the MDS
             for key, value in param_against_file.items():
@@ -45,8 +50,9 @@ class DeviceInfo(DeviceInfoPlugin):
                 output = stdout.read().decode('utf-8')
                 # Update the deviceInfo with the fetched information or add None if not found
                 if re.search(value["regex"], output,  re.IGNORECASE | re.DOTALL):
-                    # Update key value in deviceInfo with the fetched value
-                    deviceInfo[key] = re.search(value["regex"], output,  re.IGNORECASE | re.DOTALL).group(1)
+                    # Update key value in deviceInfo with the fetched value if key is not there, add it
+                    if key not in deviceInfo:
+                        deviceInfo[key] = re.search(value["regex"], output,  re.IGNORECASE | re.DOTALL).group(1)
                 else:
                     deviceInfo[key] = None
             ssh.close()
@@ -68,7 +74,7 @@ class DeviceInfo(DeviceInfoPlugin):
 
         try:
             logger.debug(f"Pinging device {ip}...")
-            response = ping(ip, timeout=2)  # ✅ Pings and gets response time
+            response = ping(ip, timeout=2)  # Pings and gets response time
             device_status = "Online" if response else "Offline"
             logger.debug(f"Ping result for {ip}: {device_status}")
             return device_status

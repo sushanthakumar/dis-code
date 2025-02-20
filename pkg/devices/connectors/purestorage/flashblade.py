@@ -10,23 +10,25 @@ import re
 from paramiko import SSHClient
 from utils.scn_log import logger
 from ping3 import ping
+import json
+
+CREDENTIALS_PATH = os.path.join(os.path.dirname(__file__), "./login_details/credentials.json")
 
 # Define the parameters to be fetched from the devices using SSH, and the corresponding commands and regex patterns
 param_against_file ={
     "Firmware Version": {"cmd": "Firmware_Version", "regex":r"(.*)"},
-    "Software Version": {"cmd": "show version", "regex":r'Purity//FA\s+(\d+\.\d+\.\d+)'},
+    "Software Version": {"cmd": "show version", "regex":r'Purity//FB\s+(\d+\.\d+\.\d+)'},
     "Hardware Model": {"cmd": "cat /proc/cpuinfo", "regex":r"model name\s+:(.*)"}
     }
 
-ssh_details = {
-    "username": "admin",
-    "password": "admin",
-    "port": 22
-}
-
 class DeviceInfo(DeviceInfoPlugin):
     def __init__(self):
-        pass
+        with open(CREDENTIALS_PATH, 'r') as fd:
+            credentials = json.load(fd)
+        
+        self.user = credentials.get("flashblade").get("username")
+        self.password = credentials.get("flashblade").get("password")
+        self.port = credentials.get("flashblade").get("port")
 
     def get_metadata_info(self, deviceInfo):
         # Do SSH using IP
@@ -36,7 +38,7 @@ class DeviceInfo(DeviceInfoPlugin):
             ssh = SSHClient()
             ssh.load_system_host_keys()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            ssh.connect(ip, username=ssh_details["username"], password=ssh_details["password"], port=ssh_details["port"], timeout=5)
+            ssh.connect(ip, port=self.port, username=self.user, password=self.password, timeout=5)
 
             # Get the device information from the MDS
             for key, value in param_against_file.items():
@@ -65,7 +67,7 @@ class DeviceInfo(DeviceInfoPlugin):
 
         try:
             logger.debug(f"Pinging device {ip}...")
-            response = ping(ip, timeout=2)  # ✅ Pings and gets response time
+            response = ping(ip, timeout=2)  # Pings and gets response time
             device_status = "Online" if response else "Offline"
             logger.debug(f"Ping result for {ip}: {device_status}")
             return device_status

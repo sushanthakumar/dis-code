@@ -6,17 +6,14 @@ Description: This file contains the class ScnDevicesDb which is used to create a
 import os
 import sqlite3
 import json
-import re
 import importlib
 from pathlib import Path
-from datetime import datetime
-from paramiko import SSHClient, AutoAddPolicy
 #import discovery.connectors.dhcp as dhcp
 from discovery.connectors.dhcp import dhcp_connector
 from discovery.connectors.simulator import device_simulator
 #from devices.utils.scn_log import logger
 from utils.scn_log import logger
-
+import sys
 
 # Constants
 CWD = os.path.dirname(os.path.abspath(__file__))
@@ -63,8 +60,7 @@ class ScnDevicesDb:
         #Create the database and table if not exists
         cursor.execute(""" 
         Create table if not exists device_db(
-            ID INTEGER primary key Autoincrement,
-            Serial_ID INTEGER UNIQUE,
+            Serial_ID INTEGER,
             Inventory_Type VARCHAR(255),
             Vendor_Name VARCHAR(255),
             IP_Address VARCHAR(255),
@@ -72,7 +68,7 @@ class ScnDevicesDb:
             DHCP_Options VARCHAR(255),
             Firmware_Version VARCHAR(255),
             Software_Version VARCHAR(255),
-            Hardware_Model VARCHAR(255),
+            Hardware_Model VARCHAR(255) primary key,
             Tags JSON,
             status VARCHAR(225) default "Online",
             Device_Type VARCHAR(255)           ) """)
@@ -91,33 +87,31 @@ class ScnDevicesDb:
     #Function to write the data to the database
     def scan_and_update(self):
         logger.debug("Scanning devices and updating the database")
+
         # Simluated Devices with meta data
-        self.devices_meta_data = device_simulator.scan_devices() 
+        self.devices_meta_data = device_simulator.scan_devices()
+        # Add new column for Device Type with value "Simulated"
+        for device in self.devices_meta_data:
+            device["Device Type"] = "Simulated"
 
         # Get Devices IPs from DHCP server (lease file)
         self.devices = dhcp_connector.scan_devices()
-
-        print("Devices from DHCP: ", self.devices)
-
-
+        logger.debug(f"Devices from DHCP server: {self.devices}")
         # Connect to each device using IP and Host Name as metioned in connectors/
-        self.__get_device_meta_data()
-
-
-        # Todo: Need to call API to full data from the devices by connecting to the devices using SSH/telnet
-        # Depending on device type, the connection method mentioned in .json file (configuration)
+        self.__get_device_meta_data() 
 
         cursor = self.db_connection.cursor()
         for device in self.devices_meta_data:
-            logger.debug("Updating device %s in the database", device)
 
-            cursor.execute("SELECT * FROM device_db WHERE Serial_ID = ?", (device["Serial ID"],))
+            cursor.execute("SELECT * FROM device_db WHERE Hardware_Model = ?", (device["Hardware Model"],))
             #cursor.execute("SELECT COUNT(*) FROM device_db;")
             rows = cursor.fetchall()
+
+            if device["IP Address"] == "192.168.56.110":
+                logger.debug(f"################# Device IP is entered in data base {device} and rows are {rows}")
             if rows:
-                print(device)
-                cursor.execute("UPDATE device_db SET Inventory_Type = ?, Vendor_Name = ?, IP_Address = ?, DHCP_Lease = ?, DHCP_Options = ?, Firmware_Version = ?, Software_Version = ?, Hardware_Model = ?, Device_Type = 'DHCP' WHERE Serial_ID = ?",
-                                (device["Inventory Type"], device["Vendor Name"], device["IP Address"], device["DHCP Lease"], device["DHCP Options"], device["Firmware Version"], device["Software Version"], device["Hardware Model"], device["Serial ID"]))
+                cursor.execute("UPDATE device_db SET Inventory_Type = ?, Vendor_Name = ?, IP_Address = ?, DHCP_Lease = ?, DHCP_Options = ?, Firmware_Version = ?, Software_Version = ?, Hardware_Model = ?, Device_Type = ? WHERE Hardware_Model = ?",
+                                (device["Inventory Type"], device["Vendor Name"], device["IP Address"], device["DHCP Lease"], device["DHCP Options"], device["Firmware Version"], device["Software Version"], device["Hardware Model"], device["Device Type"], device["Hardware Model"]))
             else:
                 cursor.execute("INSERT INTO device_db (Serial_ID, Inventory_Type, Vendor_Name, IP_Address, DHCP_Lease, DHCP_Options, Firmware_Version, Software_Version, Hardware_Model,Device_Type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,'DHCP')",
                                 (device["Serial ID"], device["Inventory Type"], device["Vendor Name"], device["IP Address"], device["DHCP Lease"], device["DHCP Options"], device["Firmware Version"], device["Software Version"], device["Hardware Model"]))
@@ -133,9 +127,38 @@ class ScnDevicesDb:
         # make dictionary of the data and return
         devices_list = []
         for row in rows:
-            devices_list.append({"ID": row[0] ,"Serial_ID":row[1], "Inventory_Type":row[2], "Vendor_Name":row[3], "IP_Address":row[4], "DHCP_Lease":row[5], "DHCP_Options":row[6], "Firmware_Version":row[7], "Software_Version":row[8], "Hardware_Model":row[9], "Tags": row[10], "Status":row[11], "Device_Type": row[12]})
+            devices_list.append({"Serial_ID":row[0], "Inventory_Type":row[1], "Vendor_Name":row[2], "IP_Address":row[3], "DHCP_Lease":row[4], "DHCP_Options":row[5], "Firmware_Version":row[6], "Software_Version":row[7], "Hardware_Model":row[8], "Tags": row[9], "Status":row[10], "Device_Type": row[11]})
         return devices_list
 
+    #Function to delete the devices from the database whos device type is DHCP
+    def delete_devices(self):
+        cursor = self.db_connection.cursor()
+        cursor.execute("DELETE FROM device_db WHERE Device_Type = 'DHCP'")
+        print("Deleted the devices from the database whos device type is DHCP")
+        self.db_connection.commit()    
+
+    def __get_collect_device_info_from_connector(self, devicePluginFilePath, device_metadata_information):
+        try:
+            # DevicePluginsPool[device["Inventory Type"]] is library path to the device plugin
+            # Example: DevicePluginsPool[device["Inventory Type"]] = "/data/scn_discovery/vendor_plugins/mds.py"
+            # Import the module and create an object of the class
+            # Import module dynamically using importlib
+
+            module_path = VENDOR_CONNECTORS_PATH+devicePluginFilePath
+            module_name = Path(VENDOR_CONNECTORS_PATH+devicePluginFilePath).stem  # This will give 'mds'
+
+            spec = importlib.util.spec_from_file_location(module_name, module_path)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+
+            devicesInfo = module.DeviceInfo()
+            devicesInfo.get_metadata_info(device_metadata_information)
+            logger.debug("Device metadata information: %s", device_metadata_information)
+            self.devices_meta_data.append(device_metadata_information.copy())
+
+        except Exception as e:
+            logger.debug(f"Error loading plugin for {devicePluginFilePath}")
+            logger.debug("Error: ", e)
 
     def __get_device_meta_data(self):
         device_name_to_type = {
@@ -146,9 +169,7 @@ class ScnDevicesDb:
             "Arista": "Switch",
         }
 
-        print("Scanning devices and fetching metadata information")
-        print("Devices: ", self.devices)
-   
+  
         # Step 5: Create a SSH connection to each device and fetch the required parameters
         SerialNum = 1
         for device in self.devices:
@@ -162,111 +183,33 @@ class ScnDevicesDb:
                         'Vendor Name': 'Unknown',
                         'IP Address': device["ip"],
                         'DHCP Lease': "--",
-                        'DHCP Options': device["mac"],
+                        'DHCP Options': "--",
                         'Firmware Version': "--",
                         'Software Version': "--",
-                        'Hardware Model': "--",
-                        "DviceType": "Unknown"
+                        'Hardware Model': device["mac"],
+                        "Device Type": "DHCP"
             }
 
+            # if Inventory Type is available in the DevicePluginsPool, then use the plugin to get the metadata information
             if device["Inventory Type"] in DevicePluginsPool["DevicePluginsPool"].keys(): # Plugins are available for the device
                 devicePluginFilePath = DevicePluginsPool["DevicePluginsPool"][device["Inventory Type"]]
-                try:
-                    # DevicePluginsPool[device["Inventory Type"]] is library path to the device plugin
-                    # Example: DevicePluginsPool[device["Inventory Type"]] = "/data/scn_discovery/vendor_plugins/mds.py"
-                    # Import the module and create an object of the class
-                    # Import module dynamically using importlib
-                    #module = importlib.import_module(devicePluginFilePath)
+                self.__get_collect_device_info_from_connector(devicePluginFilePath, device_metadata_information)
 
-                    module_path = VENDOR_CONNECTORS_PATH+devicePluginFilePath
-                    module_name = Path(VENDOR_CONNECTORS_PATH+devicePluginFilePath).stem  # This will give 'mds'
+            else: # For generic devices : connector is not available
+                logger.debug("No plugin found for %s", device)
+                self.__get_collect_device_info_from_connector(DevicePluginsPool["DefaultPlugin"], device_metadata_information)
 
-                    spec = importlib.util.spec_from_file_location(module_name, module_path)
-                    module = importlib.util.module_from_spec(spec)
-                    spec.loader.exec_module(module)
-
-                    devicesInfo = module.DeviceInfo()
-                    devicesInfo.get_metadata_info(device_metadata_information)
-                    self.devices_meta_data.append(device_metadata_information.copy())
-
-
-                except Exception as e:
-                    print(f"Error loading plugin for {device['Inventory Type']}")
-                    print("Error: ", e)
-
-            else: # For generic devices
-                if device["Inventory Type"] in device_ssh_details.keys():
-                    device_metadata_information_list = self.__getGenericDegiveInfo(device,SerialNum)
-                    SerialNum += len(device_metadata_information_list)
-                    self.devices_meta_data.extend(device_metadata_information_list.copy())
-                else:
-                    logger.error("No SSH details available for %s, %s", device["ip"], device["Inventory Type"])
-                    self.devices_meta_data.append(device_metadata_information.copy())
-
-
-    # Function to fetch the parameters from the devices using SSH in genreic way
-    def __getGenericDegiveInfo(self, device, SerialNumStart):
-
-        device_information_with_dups = []
-        device_information = {}
-
-        # Check if SSH details are available for the device
-        ssh_details = device_ssh_details.get(device["hostname"], None) # MDS
-        if ssh_details:
-            SerialNum = SerialNumStart
-            sshClient = SSHClient()
-            sshClient.set_missing_host_key_policy(AutoAddPolicy())
-            ssh_details['ip'] = device["ip"]
-            try:
-                sshClient.connect(ssh_details['ip'], port=ssh_details['port'], username=ssh_details['username'], password=ssh_details['password'], timeout=5)
-                for param, cmd in param_against_file.items():
-                    stdin, stdout, stderr = sshClient.exec_command(cmd["file"])
-                    output = stdout.read().decode()
-                    match = re.search(cmd["regex"], output)
-                    if match:
-                        device_information[param] = match.group(1).strip()
-                    else:
-                        device_information[param] = "N/A"
-                sshClient.close()
-            except Exception as e:
-                print(f"Error connecting to {device['hostname']}: {e}")
-                for param in param_against_file.keys():
-                    device_information[param] = "N/A"
-            
-            device_information["IP Address"] = device["ip"]
-            device_information["DHCP Options"] = device["mac"]
-
-            # Calculate DHCP Lease time depending on the start and stop time
-            try:
-                format = '%Y/%m/%d %H:%M:%S'
-                datetime1 = datetime.strptime(device["start_time"], format)
-                datetime2 = datetime.strptime(device["stop_time"], format)
-                device_information["DHCP Lease"]  = (datetime2 - datetime1).total_seconds()
-            except Exception as e:
-                print(f"Error calculating DHCP Lease time: {e}")
-                device_information["DHCP Lease"] = "--"
-
-            # Add information for software version
-            device_information["Software Version"] = 1.0
-
-            # Duplicate the device information for multiple repetitions
-            for i in range(REPETITIONS):
-                device_information["Serial ID"] = SerialNum
-                SerialNum += 1
-                device_information_with_dups.append(device_information.copy())
-                
-            return device_information_with_dups
     #Function to get the device health "offline" or "online"
     def healthcheck(self, id):
         logger.debug("Starting healthcheck for device ID %s...", id)
 
         # Fetch device information from the database
         cursor = self.db_connection.cursor()
-        cursor.execute("SELECT * FROM device_db WHERE ID = ?", (id,))
+        cursor.execute("SELECT * FROM device_db WHERE Hardware_Model = ?", (id,))
         device = cursor.fetchone()
 
         if not device:
-            logger.error("Device with ID %s not found in database.", id)
+            logger.error("Device with Hardware_Model %s not found in database.", id)
 
             return "Device Not Found"
         
@@ -298,7 +241,7 @@ class ScnDevicesDb:
             'Firmware Version': "--",
             'Software Version': "--",
             'Hardware Model': "--",
-            "DeviceType": "Unknown"
+            "Device Type": "Unknown"
         }
         # Check if a plugin exists for the given inventory type
         if inventory_type in DevicePluginsPool["DevicePluginsPool"]:

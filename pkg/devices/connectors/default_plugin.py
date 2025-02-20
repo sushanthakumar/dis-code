@@ -1,3 +1,7 @@
+
+
+
+
 '''
 File: scn_disc_db.py
 Author: Sandhya, Kamal
@@ -11,25 +15,37 @@ import re
 from paramiko import SSHClient
 from utils.scn_log import logger
 from ping3 import ping
-import sys
+import json 
+
+CREDENTIALS_PATH = os.path.join(os.path.dirname(__file__), "./login_details/credentials.json")
 
 # Define the parameters to be fetched from the devices using SSH, and the corresponding commands and regex patterns
 param_against_file ={
-    "Software Version": {"cmd": "show version", "regex":r'version\s+(\d+\.\d+\(\d+\))'},
-    "Hardware Model": {"cmd": "cat /proc/cpuinfo", "regex":r"model name\s+:(.*)"},
+    "Inventory Type": {"file": "cat /proc/cpuinfo", "regex":r"vendor_id\s+:(.*)"},
+    "Vendor Name": {"file": "/proc/cpuinfo", "regex":r"vendor_id\s+:(.*)"},    
+    "IP Address": {"file": "IP_Address", "regex":r"(.*)"},
+    "DHCP Lease": {"file": "DHCP_Lease", "regex":r"(.*)"},
+    "DHCP Options": {"file": "DHCP_Options", "regex":r"(.*)"},
+    "Firmware Version": {"file": "Firmware_Version", "regex":r"(.*)"},
+    "Software Version": {"file": "uname -a", "regex":r"(.*)#"},
+    "Serial ID": {"file": "Serial_ID", "regex":r"(.*)"}
 }
 
-ssh_details = {
-    "username": "admin",
-    "password": "admin",
-    "port": 22
-}
 
 class DeviceInfo(DeviceInfoPlugin):
     def __init__(self):
-        pass
+        with open(CREDENTIALS_PATH, 'r') as fd:
+            credentials = json.load(fd)
+        
+        self.user = credentials.get("default").get("username")
+        self.password = credentials.get("default").get("password")
+        self.port = credentials.get("default").get("port")
+        
 
     def get_metadata_info(self, deviceInfo):
+
+        print("Getting metadata info...from default_plugin.py")
+
         # Do SSH using IP
         # Get the IP Address from the deviceInfo
         ip = deviceInfo.get("IP Address")
@@ -37,31 +53,27 @@ class DeviceInfo(DeviceInfoPlugin):
             ssh = SSHClient()
             ssh.load_system_host_keys()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            status = ssh.connect(ip, username=ssh_details["username"], password=ssh_details["password"], port=ssh_details["port"], timeout=5)
-            sys.stdout.flush()
+            ssh.connect(ip, self.port, self.user, self.password, timeout=1)
 
             # Get the device information from the MDS
             for key, value in param_against_file.items():
                 stdin, stdout, stderr = ssh.exec_command(value["cmd"])
                 output = stdout.read().decode('utf-8')
-                print(f"n9k: Output: {output} for key: {key}")
-                sys.stdout.flush()
                 # Update the deviceInfo with the fetched information or add None if not found
                 if re.search(value["regex"], output,  re.IGNORECASE | re.DOTALL):
-                    # Update key value in deviceInfo with the fetched value
-                    deviceInfo[key] = re.search(value["regex"], output,  re.IGNORECASE | re.DOTALL).group(1)
+                    # Update key value in deviceInfo with the fetched value if key is not there, add it
+                    if key not in deviceInfo:
+                        deviceInfo[key] = re.search(value["regex"], output,  re.IGNORECASE | re.DOTALL).group(1)
                 else:
                     deviceInfo[key] = None
-            deviceInfo["Vendor Name"] = "Cisco"
             ssh.close()
+            deviceInfo["Vendor Name"] = "Unclassified"
         except Exception as e:
             print(f"Error in getting device information: {e}")
-            sys.stdout.flush()
             return None
-        
-        print("Getting metadata info...from n9k.py")
-        print(deviceInfo)
 
+        print("Getting metadata info...from mds.py")
+        
     def healthcheck(self, deviceInfo):
         """Perform a ping test to check device health."""
         ip = deviceInfo.get("IP Address")

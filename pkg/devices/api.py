@@ -49,10 +49,10 @@ class Scan(Resource):
         """Function to scan the list of devices"""
         logger.debug("Scanning for devices...")
         try:
+            devices_list = devices_db.delete_devices()
             devices_list = devices_db.scan_and_update()
             devices_list = devices_db.get_devices_list()
-            logger.debug(f"Devices list length: {len(devices_list)}")
-            sys.stdout.flush()  
+            logger.debug(f"Length of devices_list: {len(devices_list)}")
             return devices_list, 200
         except Exception as e:
             return {"message": str(e)}, 500
@@ -70,8 +70,7 @@ class List(Resource):
         logger.debug("Retrieving devices list...")
         try:
             devices_list = devices_db.get_devices_list()
-            print("Length of devices_list: ", len(devices_list))
-            logger.debug(f"Devices list: {devices_list}")
+            logger.debug(f"Length of devices_list: {len(devices_list)}")
             return devices_list, 200
         except Exception as e:
             return {"message": str(e)}
@@ -94,7 +93,8 @@ class UploadCSV(Resource):
     def post(self):
         """Function to save devices file in the database"""
         try:
-            file_path = "/tmp/devices/0028180482"
+
+            file_path = "/tmp/devices/0065077250"
             logger.debug("Received file path:%s", file_path)
 
             # Check if file exists
@@ -130,8 +130,11 @@ class UploadCSV(Resource):
             # Iterate over each row in the CSV file
             for _, device in csv_data.iterrows():
                 try:
+                    cursor.execute("DELETE FROM device_db WHERE Device_Type = 'Static'")
+                    print("Deleted the devices from the database whos device type is Static")
+                    hardware_model = device["Hardware Model"]
                     serial_id = device["Serial ID"]
-                    cursor.execute("SELECT * FROM device_db WHERE Serial_ID = ?", (serial_id,))
+                    cursor.execute("SELECT * FROM device_db WHERE Hardware_Model = ?", (hardware_model,))
                     rows = cursor.fetchall()
                     # If the device already exists, update it 
                     if rows:
@@ -140,11 +143,11 @@ class UploadCSV(Resource):
                             Inventory_Type = ?, Vendor_Name = ?, IP_Address = ?, 
                             DHCP_Lease = ?, DHCP_Options = ?, Firmware_Version = ?, 
                             Software_Version = ?, Hardware_Model = ? , Device_Type = "Static"
-                            WHERE Serial_ID = ?
+                            WHERE Hardware_Model = ?
                         """, (
                             device["Inventory Type"], device["Vendor Name"], device["IP Address"],
                             device["DHCP Lease"], device["DHCP Options"], device["Firmware Version"],
-                            device["Software Version"], device["Hardware Model"], serial_id
+                            device["Software Version"], device["Hardware Model"], hardware_model
                        ))
                         # If the device is not found, insert it
                     else:
@@ -169,13 +172,12 @@ class UploadCSV(Resource):
             return {"error": "An unexpected error occurred."}, 500
 
 ########## Tagging devices ##########
-@api.route('/v1/devices/<int:id>/tags')        
+@api.route('/v1/devices/<string:id>/tags')        
 @api.expect(model_list)
 class device_tag(Resource):
     def patch(self, id):
         
         data = request.json
-        tags = data.get("Tag", {})
         tags = data.get("Tag", {})
         conn = devices_db.establish_db_conn()
         cursor = conn.cursor()
@@ -184,7 +186,7 @@ class device_tag(Resource):
         tag_list = [json.dumps({key: value}) for key, value in tags.items()]
 
         # Fetch existing tags for the device
-        cursor.execute("SELECT Tags FROM device_db WHERE ID = ?", (id,))
+        cursor.execute("SELECT Tags FROM device_db WHERE Hardware_Model = ?", (id,))
         existing_tag = cursor.fetchone()
 
         if existing_tag and existing_tag[0] is not None:
@@ -217,7 +219,7 @@ class device_tag(Resource):
                 cursor.execute("INSERT INTO tags (tags, device_count) VALUES (?, ?)", (tag_value, 1))
 
         # Store the new tags in device_db
-        cursor.execute("UPDATE device_db SET Tags = ? WHERE ID = ?", (json.dumps(tag_list), id))
+        cursor.execute("UPDATE device_db SET Tags = ? WHERE Hardware_Model = ?", (json.dumps(tag_list), id))
 
         # Commit changes
         # Commit changes
@@ -236,7 +238,7 @@ class Healthcheck(Resource):
         try:
             conn = devices_db.establish_db_conn()
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM device_db WHERE ID = ?", (id,))
+            cursor.execute("SELECT * FROM device_db WHERE Hardware_Model = ?", (id,))
             device = cursor.fetchone()
         
             if not device:
@@ -247,10 +249,10 @@ class Healthcheck(Resource):
                 print(f"Healthcheck returned None for device ID {id}.")
                 return {"message": "Healthcheck failed."}, 500
 
-            cursor.execute("UPDATE device_db SET status = ? WHERE ID = ?", (device_status, id))
+            cursor.execute("UPDATE device_db SET status = ? WHERE Hardware_Model = ?", (device_status, id))
             conn.commit()
             # Fetch updated record
-            cursor.execute("SELECT * FROM device_db WHERE ID = ?", (id,))
+            cursor.execute("SELECT * FROM device_db WHERE Hardware_Model = ?", (id,))
             updated_device = cursor.fetchone()
             column_names = [desc[0] for desc in cursor.description]
             updated_device_dict = dict(zip(column_names, updated_device))
@@ -475,3 +477,4 @@ if __name__ == '__main__':
     logger.debug("Starting Device Management API server...")
     devices_db.scan_and_update()
     app.run(host="0.0.0.0", port=5000, debug=True)
+    

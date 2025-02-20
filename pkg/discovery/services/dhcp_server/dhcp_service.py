@@ -9,18 +9,10 @@ import json
 from utils.scn_log import logger
 import sys
  
-# Get CWD using os with 
-CWD = os.path.dirname(os.path.abspath(__file__))
 DHCP_HOST_CONFIG_FILE = "/tmp/dhcp_host.conf"
 DHCPD_CONFIG_FILE = "/tmp/dhcpd.conf"
 DHCPD_CONFIG_SERVER_PATH = "/etc/dhcp/dhcpd.conf"
 TEMP_REMOTE_PATH = "/tmp/dhcpd_tmp.conf"
-
-
-# DHCP_HOST_CONFIG_FILE = "/tmp/config/dhcp_host.conf"
-# DHCPD_CONFIG_FILE = "/tmp/config/dhcpd.conf"
-# DHCPD_CONFIG_SERVER_PATH = "/etc/dhcp/dhcpd.conf"
-# TEMP_REMOTE_PATH = "/tmp/dhcpd_tmp.conf"
 
 class DHCPService:
     # Define the constructor to initialize the DHCP server IP, username, and password and port number
