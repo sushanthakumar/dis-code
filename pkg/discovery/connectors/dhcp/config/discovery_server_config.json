@@ -1,9 +1,0 @@
-{
-    "dhcp_server_details": {
-        "ip": "192.168.10.1",
-        "user": "vagrant",
-        "password": "vagrant",
-        "port": 22,
-        "lease_file": "/var/lib/dhcpd/dhcpd.leases"
-    }
-}

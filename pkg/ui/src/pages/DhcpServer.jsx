@@ -6,6 +6,7 @@ const DhcpServer = () => {
   const [file, setFile] = useState(null);
   const [status, setStatus] = useState('stopped'); 
 
+
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
   };
@@ -38,9 +39,10 @@ const DhcpServer = () => {
   };
   
   
+  
   const handleStart = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:5000/v1/dhcpservice/start', {
+      const response = await fetch('/dhcpservice/start', {
         method: 'PATCH',
       });
 
@@ -58,7 +60,7 @@ const DhcpServer = () => {
 
   const handleStop = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:5000/v1/dhcpservice/stop', {
+      const response = await fetch('/dhcpservice/stop', {
         method: 'PATCH',
       });
 

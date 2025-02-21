@@ -7,6 +7,7 @@ Discription : Discovery and Usecase recommendation
 author : Kamal, Sandhya
 version :1.0
 '''
+import sys
 import os
 import json
 from flask import Flask, request
@@ -20,7 +21,7 @@ from utils.scn_log import logger
 from werkzeug.utils import secure_filename
 from discovery.connectors.simulator import device_simulator
 from discovery.services.dhcp_server.dhcp_service import DHCPService
-import sys
+import constants
 
 # Create the Flask app
 app = Flask(__name__)
@@ -47,7 +48,7 @@ class Scan(Resource):
     @api.response(500, "Internal Server Error.")
     def get(self):
         """Function to scan the list of devices"""
-        logger.debug("Scanning for devices...")
+        logger.debug("synclist: Scanning for devices...")
         try:
             devices_list = devices_db.delete_devices()
             devices_list = devices_db.scan_and_update()
@@ -67,7 +68,7 @@ class List(Resource):
     @api.response(500, "Internal Server Error.")
     def get(self):
         """Function to retrieve the list of devices"""
-        logger.debug("Retrieving devices list...")
+        logger.debug("devices: Retrieving devices list...")
         try:
             devices_list = devices_db.get_devices_list()
             logger.debug(f"Length of devices_list: {len(devices_list)}")
@@ -94,7 +95,8 @@ class UploadCSV(Resource):
         """Function to save devices file in the database"""
         try:
 
-            file_path = "/tmp/devices/0065077250"
+            file_path = "/tmp/devices/add_device.csv"
+            file_path = "/tmp/devices/add_device.csv"
             logger.debug("Received file path:%s", file_path)
 
             # Check if file exists
@@ -104,22 +106,16 @@ class UploadCSV(Resource):
 
             # Read CSV file
             try:
-                csv_data = pd.read_csv(file_path, skiprows=4)
+                csv_data = pd.read_csv(file_path)
                 csv_data.columns = csv_data.columns.str.strip() 
-                logger.debug(f"CSV Data:\n %s " ,csv_data)
-                logger.debug("CSV Columns: %s", csv_data.columns.tolist())
+                logger.debug(f"CSV Data length:\n %s " ,len(csv_data))
 
             except Exception as e:
                 logger.error("Error reading CSV file: %s", e)
                 return {"error": "Failed to read CSV file."}, 400
 
             # Check if necessary columns exist
-            required_columns = [
-                "Serial ID", "Inventory Type", "Vendor Name", "IP Address",
-                "DHCP Lease", "DHCP Options", "Firmware Version",
-                "Software Version", "Hardware Model"
-            ]
-            missing_columns = [col for col in required_columns if col not in csv_data.columns]
+            missing_columns = [col for col in constants.required_columns_add_device if col not in csv_data.columns]
             if missing_columns:
                 logger.error("Missing columns in CSV: %s", missing_columns)
                 return {"error": f"Missing columns in CSV: {missing_columns}"}, 400
@@ -127,39 +123,40 @@ class UploadCSV(Resource):
             # Database operations
             conn = devices_db.establish_db_conn()
             cursor = conn.cursor()
+            cursor.execute("DELETE FROM device_db WHERE Discovery_Type = 'Static'")
+            print("Deleted the devices from the database whos device type is Static")
             # Iterate over each row in the CSV file
+            cursor.execute("DELETE FROM device_db WHERE Device_Type = 'Static'")
+            print("Deleted the devices from the database whos device type is Static")
             for _, device in csv_data.iterrows():
                 try:
-                    cursor.execute("DELETE FROM device_db WHERE Device_Type = 'Static'")
-                    print("Deleted the devices from the database whos device type is Static")
-                    hardware_model = device["Hardware Model"]
-                    serial_id = device["Serial ID"]
-                    cursor.execute("SELECT * FROM device_db WHERE Hardware_Model = ?", (hardware_model,))
+                    hardware_address = device["Hardware Address"]
+                    cursor.execute("SELECT * FROM device_db WHERE Hardware_Address = ?", (hardware_address,))
                     rows = cursor.fetchall()
                     # If the device already exists, update it 
                     if rows:
                         cursor.execute("""
                             UPDATE device_db SET 
-                            Inventory_Type = ?, Vendor_Name = ?, IP_Address = ?, 
-                            DHCP_Lease = ?, DHCP_Options = ?, Firmware_Version = ?, 
-                            Software_Version = ?, Hardware_Model = ? , Device_Type = "Static"
-                            WHERE Hardware_Model = ?
+                            Inventory_Type = ?, Vendor_Name = ?, Hardware_Address = ?, IP_Address = ?, 
+                            DHCP_Lease = ?, Firmware_Version = ?, 
+                            Software_Version = ?, Hardware_Model = ? , Discovery_Type = "Static"
+                            WHERE Hardware_Address = ?
                         """, (
-                            device["Inventory Type"], device["Vendor Name"], device["IP Address"],
-                            device["DHCP Lease"], device["DHCP Options"], device["Firmware Version"],
-                            device["Software Version"], device["Hardware Model"], hardware_model
+                            device["Inventory Type"], device["Vendor Name"], device["Hardware Address"], device["IP Address"],
+                            device["DHCP Lease"], device["Firmware Version"],
+                            device["Software Version"], device["Hardware Model"], hardware_address
                        ))
                         # If the device is not found, insert it
                     else:
                         cursor.execute("""
                             INSERT INTO device_db 
-                            (Serial_ID, Inventory_Type, Vendor_Name, IP_Address, 
-                            DHCP_Lease, DHCP_Options, Firmware_Version, 
-                            Software_Version, Hardware_Model,Device_Type) 
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, "Static")
+                            (Inventory_Type, Vendor_Name, Hardware_Address, IP_Address, 
+                            DHCP_Lease, Firmware_Version, 
+                            Software_Version, Hardware_Model,Discovery_Type) 
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, "Static")
                         """, (
-                            serial_id, device["Inventory Type"], device["Vendor Name"],
-                            device["IP Address"], device["DHCP Lease"], device["DHCP Options"],
+                            device["Inventory Type"], device["Vendor Name"],
+                            device["Hardware Address"], device["IP Address"], device["DHCP Lease"], 
                             device["Firmware Version"], device["Software Version"], device["Hardware Model"]
                         ))
                 except KeyError as ke:
@@ -186,7 +183,7 @@ class device_tag(Resource):
         tag_list = [json.dumps({key: value}) for key, value in tags.items()]
 
         # Fetch existing tags for the device
-        cursor.execute("SELECT Tags FROM device_db WHERE Hardware_Model = ?", (id,))
+        cursor.execute("SELECT Tags FROM device_db WHERE Hardware_Address = ?", (id,))
         existing_tag = cursor.fetchone()
 
         if existing_tag and existing_tag[0] is not None:
@@ -219,13 +216,12 @@ class device_tag(Resource):
                 cursor.execute("INSERT INTO tags (tags, device_count) VALUES (?, ?)", (tag_value, 1))
 
         # Store the new tags in device_db
-        cursor.execute("UPDATE device_db SET Tags = ? WHERE Hardware_Model = ?", (json.dumps(tag_list), id))
+        cursor.execute("UPDATE device_db SET Tags = ? WHERE Hardware_Address = ?", (json.dumps(tag_list), id))
 
         # Commit changes
         # Commit changes
         conn.commit()
         return {"message": "Tags updated and counts adjusted."}, 200
-
 
 ############ Health Check ###########
 @api.route("/v1/devices/healthcheck/<id>")
@@ -238,7 +234,7 @@ class Healthcheck(Resource):
         try:
             conn = devices_db.establish_db_conn()
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM device_db WHERE Hardware_Model = ?", (id,))
+            cursor.execute("SELECT * FROM device_db WHERE Hardware_Address = ?", (id,))
             device = cursor.fetchone()
         
             if not device:
@@ -249,10 +245,10 @@ class Healthcheck(Resource):
                 print(f"Healthcheck returned None for device ID {id}.")
                 return {"message": "Healthcheck failed."}, 500
 
-            cursor.execute("UPDATE device_db SET status = ? WHERE Hardware_Model = ?", (device_status, id))
+            cursor.execute("UPDATE device_db SET status = ? WHERE Hardware_Address = ?", (device_status, id))
             conn.commit()
             # Fetch updated record
-            cursor.execute("SELECT * FROM device_db WHERE Hardware_Model = ?", (id,))
+            cursor.execute("SELECT * FROM device_db WHERE Hardware_Address = ?", (id,))
             updated_device = cursor.fetchone()
             column_names = [desc[0] for desc in cursor.description]
             updated_device_dict = dict(zip(column_names, updated_device))
@@ -278,6 +274,7 @@ class tag(Resource):
         for row in rows:
             #Appenda all the row in the list initialized above
             tags.append([{"Id" : row[0]},json.loads(row[1]), {"Device_count" : row[2]}])   
+        logger.debug(f"Tags data returned: {tags}")
         return tags  
     
     #Adds the data in the data 
@@ -387,90 +384,38 @@ class upload(Resource):
         logger.debug("Headers ----> : ", request.headers)
         return
 
-        
-######## Upload devices ##############
-@api.route('/v1/devices/upload')
-class UploadCSV(Resource):
-    @api.doc(description="Upload a CSV file from the local file system (supports Docker volumes).")
-    @api.response(201, "File uploaded successfully.")
-    @api.response(400, "Invalid file path or format.")
-    @api.response(500, "Internal server error.")
+@api.route('/v1/new_upload')
+@api.doc(description="devices.")
+class new_upload(Resource):
     def post(self):
+        if 'file' not in request.files:
+            return {"error": "No file part"}, 400
+
+        file = request.files['file']
+
+        if file.filename == '':
+            return {"error": "No selected file"}, 400
+
         try:
-            file_path = "/tmp/devices/0064159746"
-            logger.debug(f"Received file path: {file_path}")
+            # Read the file content directly without saving
+            file_content = file.read().decode('utf-8')
 
-            # Check if file exists
-            if not os.path.exists(file_path):
-                logger.error(f"File not found: {file_path}")
-                return {"error": "File not found."}, 400
+            # Define new file path
+            new_file_path = os.path.join(constants.add_device_path, constants.add_device_filename)
 
-            # Read CSV file
-            try:
-                csv_data = pd.read_csv(file_path)
-                csv_data.columns = csv_data.columns.str.strip()  # Remove spaces from column names
-                logger.debug(f"CSV Columns: {csv_data.columns.tolist()}")
-            except Exception as e:
-                logger.error(f"Error reading CSV file: {e}")
-                return {"error": "Failed to read CSV file."}, 400
+            # Write extracted content to new file
+            with open(new_file_path, 'w', encoding='utf-8') as f:
+                f.write(file_content)
 
-            # Check if necessary columns exist
-            required_columns = [
-                "Serial ID", "Inventory Type", "Vendor Name", "IP Address",
-                "DHCP Lease", "DHCP Options", "Firmware Version",
-                "Software Version", "Hardware Model"
-            ]
-            missing_columns = [col for col in required_columns if col not in csv_data.columns]
-            if missing_columns:
-                logger.error(f"Missing columns in CSV: {missing_columns}")
-                return {"error": f"Missing columns in CSV: {missing_columns}"}, 400
-
-            # Database operations
-            conn = devices_db.establish_db_conn()
-            cursor = conn.cursor()
-
-            for _, device in csv_data.iterrows():
-                try:
-                    serial_id = device["Serial ID"]
-                    cursor.execute("SELECT * FROM device_db WHERE Serial_ID = ?", (serial_id,))
-                    rows = cursor.fetchall()
-
-                    if rows:
-                        cursor.execute("""
-                            UPDATE device_db SET 
-                            Inventory_Type = ?, Vendor_Name = ?, IP_Address = ?, 
-                            DHCP_Lease = ?, DHCP_Options = ?, Firmware_Version = ?, 
-                            Software_Version = ?, Hardware_Model = ? 
-                            WHERE Serial_ID = ?
-                        """, (
-                            device["Inventory Type"], device["Vendor Name"], device["IP Address"],
-                            device["DHCP Lease"], device["DHCP Options"], device["Firmware Version"],
-                            device["Software Version"], device["Hardware Model"], serial_id
-                        ))
-                    else:
-                        cursor.execute("""
-                            INSERT INTO device_db 
-                            (Serial_ID, Inventory_Type, Vendor_Name, IP_Address, 
-                            DHCP_Lease, DHCP_Options, Firmware_Version, 
-                            Software_Version, Hardware_Model) 
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                        """, (
-                            serial_id, device["Inventory Type"], device["Vendor Name"],
-                            device["IP Address"], device["DHCP Lease"], device["DHCP Options"],
-                            device["Firmware Version"], device["Software Version"], device["Hardware Model"]
-                        ))
-                except KeyError as ke:
-                    logger.error(f"Missing column in row: {ke}")
-                    continue  # Skip invalid rows
-
-            conn.commit()
-            return {"message": "Success"}, 201
-
-
+            return {
+                "message": "File content extracted and stored successfully",
+                "saved_file": new_file_path
+            }, 200
 
         except Exception as e:
-            logger.error(f"Unexpected error: {e}", exc_info=True)
-            return {"error": "An unexpected error occurred."}, 500
+            return {"error": str(e)}, 500
+
+    
 
 # Run the app
 if __name__ == '__main__':

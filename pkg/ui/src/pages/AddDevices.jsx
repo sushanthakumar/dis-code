@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'; 
 import { toast } from "react-toastify"; 
 
 const AddDevices = () => {
@@ -17,7 +17,7 @@ const AddDevices = () => {
     const formData = new FormData();
     formData.append('file', selectedFile);
 
-    fetch('/device-upload', {
+    fetch('http://127.0.0.1:5000/v1/new_upload', {
       method: 'POST',
       body: formData,
     })
@@ -35,6 +35,31 @@ const AddDevices = () => {
       });
   };
 
+  
+  const handleOkClick = () => {
+    fetch('http://127.0.0.1:5000/v1/upload', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({}) 
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Failed to trigger backend function.');
+        }
+        return response.json();
+      })
+      .then((data) => {
+        toast.success('Devices added  successfully!');
+      })
+      .catch((error) => {
+        toast.error(`Error: ${error.message}`);
+      });
+  };
+  
+
   return (
     <div className="min-h-screen bg-[#FBE7CC] p-6 flex flex-col items-center">
       <h1 className="text-2xl lg:text-3xl p-2 font-bold">Add Devices</h1>
@@ -49,7 +74,7 @@ const AddDevices = () => {
           className="w-full p-3 border border-gray-300 rounded mb-4 text-sm md:text-base"
         />
         
-        {/* Button Wrapper for Flexbox Responsiveness */}
+       
         <div className="flex flex-wrap justify-center gap-4">
           <button
             onClick={handleUpload}
@@ -58,7 +83,7 @@ const AddDevices = () => {
             Upload
           </button>
           <button
-            onClick={() => console.log("OK Button Clicked")}
+            onClick={handleOkClick} 
             className="bg-orange-400 text-white px-5 py-2 rounded hover:bg-orange-500 transition text-sm md:text-base"
           >
             OK

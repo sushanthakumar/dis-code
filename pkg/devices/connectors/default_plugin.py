@@ -25,10 +25,8 @@ param_against_file ={
     "Vendor Name": {"file": "/proc/cpuinfo", "regex":r"vendor_id\s+:(.*)"},    
     "IP Address": {"file": "IP_Address", "regex":r"(.*)"},
     "DHCP Lease": {"file": "DHCP_Lease", "regex":r"(.*)"},
-    "DHCP Options": {"file": "DHCP_Options", "regex":r"(.*)"},
     "Firmware Version": {"file": "Firmware_Version", "regex":r"(.*)"},
-    "Software Version": {"file": "uname -a", "regex":r"(.*)#"},
-    "Serial ID": {"file": "Serial_ID", "regex":r"(.*)"}
+    "Software Version": {"file": "uname -a", "regex":r"(.*)#"}
 }
 
 

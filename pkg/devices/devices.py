@@ -14,33 +14,12 @@ from discovery.connectors.simulator import device_simulator
 #from devices.utils.scn_log import logger
 from utils.scn_log import logger
 import sys
-
+import constants
 # Constants
 CWD = os.path.dirname(os.path.abspath(__file__))
 VENDOR_CONNECTORS_PATH = CWD+"/connectors/"
 VENDOR_PLUGINS_PATH = CWD+"/connectors/vendor_plugin_config.json"
-REPETITIONS = 3
-
-# Define the parameters to be fetched from the devices using SSH, and the corresponding commands and regex patterns
-param_against_file ={
-    "Inventory Type": {"file": "cat /proc/cpuinfo", "regex":r"vendor_id\s+:(.*)"},
-    "Vendor Name": {"file": "/proc/cpuinfo", "regex":r"vendor_id\s+:(.*)"},    
-    "IP Address": {"file": "IP_Address", "regex":r"(.*)"},
-    "DHCP Lease": {"file": "DHCP_Lease", "regex":r"(.*)"},
-    "DHCP Options": {"file": "DHCP_Options", "regex":r"(.*)"},
-    "Firmware Version": {"file": "Firmware_Version", "regex":r"(.*)"},
-    "Software Version": {"file": "uname -a", "regex":r"(.*)#"},
-    "Hardware Model": {"file": "cat /proc/cpuinfo", "regex":r"model name\s+:(.*)"},
-    "Serial ID": {"file": "Serial_ID", "regex":r"(.*)"}
-}
-
 DevicePluginsPool = json.load(open(VENDOR_PLUGINS_PATH))
-
-# Define the SSH details for each device to connect and fetch the parameters using SSH
-device_ssh_details = {
-    "client1": {"ip":"127.0.0.1", "username": "vagrant", "password": "vagrant", "port": 22222},
-    "MikroTik": {"ip":"127.0.0.1", "username": "admin", "password": "vagrant", "port": 222222},
-}
 
 # Create class for db file create and write the data to the database
 class ScnDevicesDb:
@@ -60,19 +39,17 @@ class ScnDevicesDb:
         #Create the database and table if not exists
         cursor.execute(""" 
         Create table if not exists device_db(
-            Serial_ID INTEGER,
             Inventory_Type VARCHAR(255),
             Vendor_Name VARCHAR(255),
+            Hardware_Address VARCHAR(255) primary key,
             IP_Address VARCHAR(255),
             DHCP_Lease VARCHAR(255),
-            DHCP_Options VARCHAR(255),
             Firmware_Version VARCHAR(255),
             Software_Version VARCHAR(255),
-            Hardware_Model VARCHAR(255) primary key,
+            Hardware_Model VARCHAR(255),
             Tags JSON,
             status VARCHAR(225) default "Online",
-            Device_Type VARCHAR(255)           ) """)
-        
+            Discovery_Type VARCHAR(255)) """)
         
         cursor.execute(""" 
         Create table if not exists tags(
@@ -90,9 +67,9 @@ class ScnDevicesDb:
 
         # Simluated Devices with meta data
         self.devices_meta_data = device_simulator.scan_devices()
-        # Add new column for Device Type with value "Simulated"
+        # Add new column for Discovery Type with value "Simulated"
         for device in self.devices_meta_data:
-            device["Device Type"] = "Simulated"
+            device["Discovery Type"] = "Simulated"
 
         # Get Devices IPs from DHCP server (lease file)
         self.devices = dhcp_connector.scan_devices()
@@ -103,37 +80,50 @@ class ScnDevicesDb:
         cursor = self.db_connection.cursor()
         for device in self.devices_meta_data:
 
-            cursor.execute("SELECT * FROM device_db WHERE Hardware_Model = ?", (device["Hardware Model"],))
+            cursor.execute("SELECT * FROM device_db WHERE Hardware_Address = ?", (device["Hardware Address"],))
             #cursor.execute("SELECT COUNT(*) FROM device_db;")
             rows = cursor.fetchall()
+            
+            logger.debug(f"Device info: {device}")
 
-            if device["IP Address"] == "192.168.56.110":
-                logger.debug(f"################# Device IP is entered in data base {device} and rows are {rows}")
             if rows:
-                cursor.execute("UPDATE device_db SET Inventory_Type = ?, Vendor_Name = ?, IP_Address = ?, DHCP_Lease = ?, DHCP_Options = ?, Firmware_Version = ?, Software_Version = ?, Hardware_Model = ?, Device_Type = ? WHERE Hardware_Model = ?",
-                                (device["Inventory Type"], device["Vendor Name"], device["IP Address"], device["DHCP Lease"], device["DHCP Options"], device["Firmware Version"], device["Software Version"], device["Hardware Model"], device["Device Type"], device["Hardware Model"]))
+                cursor.execute("UPDATE device_db SET Inventory_Type = ?, Vendor_Name = ?, Hardware_Address = ?, IP_Address = ?, DHCP_Lease = ?, Firmware_Version = ?, Software_Version = ?, Hardware_Model = ?, Discovery_Type = ? WHERE Hardware_Address = ?",
+                                (device["Inventory Type"], device["Vendor Name"], device["Hardware Address"], device["IP Address"], device["DHCP Lease"],  device["Firmware Version"], device["Software Version"], device["Hardware Model"], device["Discovery Type"], device["Hardware Address"]))
             else:
-                cursor.execute("INSERT INTO device_db (Serial_ID, Inventory_Type, Vendor_Name, IP_Address, DHCP_Lease, DHCP_Options, Firmware_Version, Software_Version, Hardware_Model,Device_Type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,'DHCP')",
-                                (device["Serial ID"], device["Inventory Type"], device["Vendor Name"], device["IP Address"], device["DHCP Lease"], device["DHCP Options"], device["Firmware Version"], device["Software Version"], device["Hardware Model"]))
+                cursor.execute("INSERT INTO device_db ( Inventory_Type, Vendor_Name, Hardware_Address, IP_Address, DHCP_Lease, Firmware_Version, Software_Version, Hardware_Model,Discovery_Type) VALUES (?, ?, ?, ?, ?, ?, ?, ?,'DHCP')",
+                                (device["Inventory Type"], device["Vendor Name"], device["Hardware Address"], device["IP Address"], device["DHCP Lease"],  device["Firmware Version"], device["Software Version"], device["Hardware Model"]))
         self.db_connection.commit()
         
 
     #Function to write the data to the database
     def get_devices_list(self):
         cursor = self.db_connection.cursor()
+        cursor.row_factory = sqlite3.Row
         cursor.execute("SELECT * FROM device_db")
         rows = cursor.fetchall()
 
+        # 'Flash Blade', 'Pure Storage', 'fc:14:1b:dd:f1:a6', '10.1.1.196', '3600', 'v1.0', 'Purity//FA 6.6.10', 'XFM-8400-12', None, 'Online', 'Simulated'
         # make dictionary of the data and return
         devices_list = []
         for row in rows:
-            devices_list.append({"Serial_ID":row[0], "Inventory_Type":row[1], "Vendor_Name":row[2], "IP_Address":row[3], "DHCP_Lease":row[4], "DHCP_Options":row[5], "Firmware_Version":row[6], "Software_Version":row[7], "Hardware_Model":row[8], "Tags": row[9], "Status":row[10], "Device_Type": row[11]})
+            devices_list.append({"Inventory_Type": row["Inventory_Type"],
+                                "Vendor_Name": row["Vendor_Name"],
+                                "Hardware_Address": row["Hardware_Address"],
+                                "IP_Address": row["IP_Address"],
+                                "DHCP_Lease": row["DHCP_Lease"],
+                                "Firmware_Version": row["Firmware_Version"],
+                                "Software_Version": row["Software_Version"],
+                                "Hardware_Model": row["Hardware_Model"],
+                                "Tags": row["Tags"],
+                                "Status": row["status"],
+                                "Discovery_Type": row["Discovery_Type"]})        
         return devices_list
 
     #Function to delete the devices from the database whos device type is DHCP
     def delete_devices(self):
+        logger.debug("Deleting the entryies with discovery type: DHCP")
         cursor = self.db_connection.cursor()
-        cursor.execute("DELETE FROM device_db WHERE Device_Type = 'DHCP'")
+        cursor.execute("DELETE FROM device_db WHERE Discovery_Type = 'DHCP'")
         print("Deleted the devices from the database whos device type is DHCP")
         self.db_connection.commit()    
 
@@ -161,33 +151,22 @@ class ScnDevicesDb:
             logger.debug("Error: ", e)
 
     def __get_device_meta_data(self):
-        device_name_to_type = {
-            "MDS": "Switch",
-            "Nexus": "Switch",
-            "Cisco": "Switch",
-            "Juniper": "Router",
-            "Arista": "Switch",
-        }
 
-  
         # Step 5: Create a SSH connection to each device and fetch the required parameters
-        SerialNum = 1
         for device in self.devices:
-            SerialNum += 1
             print(f"Scanning device {device['Inventory Type']} with IP {device['ip']}")
 
             # Default device information
             device_metadata_information = {
                         'Inventory Type': device["Inventory Type"],
-                        'Serial ID': SerialNum,
                         'Vendor Name': 'Unknown',
+                        'Hardware Address': device["mac"],
                         'IP Address': device["ip"],
                         'DHCP Lease': "--",
-                        'DHCP Options': "--",
                         'Firmware Version': "--",
                         'Software Version': "--",
-                        'Hardware Model': device["mac"],
-                        "Device Type": "DHCP"
+                        "Discovery Type": "DHCP",
+                        'Hardware Model': "Unknown",
             }
 
             # if Inventory Type is available in the DevicePluginsPool, then use the plugin to get the metadata information
@@ -233,15 +212,14 @@ class ScnDevicesDb:
 
         device_metadata_information = {
             'Inventory Type': inventory_type,
-            'Serial ID': id,
             'Vendor Name': "Unknown",
+            'Hardware Address': "--",
             'IP Address': ip_address,
             'DHCP Lease': "--",
-            'DHCP Options':  "--",
             'Firmware Version': "--",
             'Software Version': "--",
             'Hardware Model': "--",
-            "Device Type": "Unknown"
+            "Discovery Type": "Unknown"
         }
         # Check if a plugin exists for the given inventory type
         if inventory_type in DevicePluginsPool["DevicePluginsPool"]:

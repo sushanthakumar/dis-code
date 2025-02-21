@@ -84,7 +84,7 @@ const Sidebar = () => {
             </button>
 
             {settingsOpen && (
-              <div className="pl-6 pr-1 space-y-2 mt-2 max-h-20 overflow-y-auto scrollbar-thin scrollbar-thumb-orange-500 scrollbar-track-orange-400">
+              <div className="pl-6 pr-1 space-y-2 mt-2 md:max-h-20 overflow-y-auto scrollbar-thin scrollbar-thumb-orange-500 scrollbar-track-orange-400">
                 <Link to="/settings/Tags" className={`hover:underline flex items-center px-2 py-1 rounded-lg ${isActive("/settings/Tags") ? "bg-orange-600" : ""}`}>
                   <Tag className="mr-2" /> Tags
                 </Link>
@@ -107,8 +107,8 @@ const Sidebar = () => {
 
         
         <footer className="mt-auto text-sm flex flex-col items-center space-y-2">
-          <h4 className="mt-6">Ver 0.1.0</h4>
-          <img src={Logo2} alt="Footer Logo" className="w-25 h-25" loading="lazy" />
+          <h4 className="mt-3">Ver 0.1.0</h4>
+          <img src={Logo2} alt="Footer Logo" className="w-25 h-20 md:w-20 md:h-20" loading="lazy" />
         </footer>
       </div>
 

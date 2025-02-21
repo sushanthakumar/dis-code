@@ -21,12 +21,14 @@ const initialState = {
   tagsLoading: true,
   selectedTag: null,
   selectedDeviceId: null,
+  selectedHardwareVersion: null,
   healthStatus: {},
   tagsDropdownVisible: false,
   selectedTags: new Set(),
   notification: "",
   isTagFilterVisible: false, 
   activeTagFilter: null,
+  totalDevices: 0,
 };
 
 
@@ -63,11 +65,13 @@ function reducer(state, action) {
       return { ...state, selectedTag: action.payload };
     case "SET_SELECTED_DEVICE_ID":
       return { ...state, selectedDeviceId: action.payload };
+    case "SET_SELECTED_HARDWARE_VERSION":
+      return { ...state, selectedHardwareVersion: action.payload };      
     case "UPDATE_DEVICE_TAG":
       return {
         ...state,
         devices: state.devices.map((device) =>
-          device["ID"] === action.payload.deviceId
+          device["Hardware_Address"] === action.payload.hardwareVersion
             ? { ...device, Tag: action.payload.tagKeyValue }
             : device
         ),
@@ -89,6 +93,8 @@ function reducer(state, action) {
       return { ...state, isTagFilterVisible: !state.isTagFilterVisible };
     case "SET_ACTIVE_TAG_FILTER":
       return { ...state, activeTagFilter: action.payload };
+    case "SET_TOTAL_DEVICES":
+      return { ...state, totalDevices: action.payload };
     default:
       return state;
   }
@@ -143,6 +149,7 @@ const Discovery = () => {
       const response = await fetch("http://127.0.0.1:5000/v1/customtags");
       if (!response.ok) throw new Error("Failed to fetch tags");
       const data = await response.json();
+      console.log("tags ",data);
 
       const transformedTags = data
         .map((item) => {
@@ -157,7 +164,7 @@ const Discovery = () => {
           }));
         })
         .flat();
-
+        console.log("tags ",transformedTags);
       reduxDispatch(setTags(transformedTags));
     } catch (err) {
       console.error("Error fetching tags:", err.message);
@@ -194,6 +201,7 @@ const Discovery = () => {
       console.log("Raw List API Response:", listData);
       console.log("Total Items Received:", listData.length);
 
+        localDispatch({ type: "SET_TOTAL_DEVICES", payload: listData.length });
         localDispatch({ type: "SET_DEVICES", payload: listData });
       } catch (err) {
         localDispatch({ type: "SET_ERROR", payload: err.message });
@@ -206,12 +214,12 @@ const Discovery = () => {
   }, [fetchTags]);
 
   
-  const handleTagAssign = useCallback(async (deviceId, tagKeyValue) => {
+  const handleTagAssign = useCallback(async (hardwareVersion, tagKeyValue) => {
     try {
-      console.log("Assigning tag:", { deviceId, tagKeyValue });
+      console.log("Assigning tag:", { hardwareVersion, tagKeyValue });
 
       const response = await fetch(
-        `http://127.0.0.1:5000/v1/devices/${deviceId}/tags`,
+        `http://127.0.0.1:5000/v1/devices/${hardwareVersion}/tags`,
         {
           method: "PATCH",
           headers: {
@@ -228,7 +236,7 @@ const Discovery = () => {
 
       localDispatch({
         type: "UPDATE_DEVICE_TAG",
-        payload: { deviceId, tagKeyValue },
+        payload: { hardwareVersion, tagKeyValue },
       });
       localDispatch({
         type: "SET_NOTIFICATION",
@@ -260,7 +268,7 @@ const Discovery = () => {
           .slice(
             (state.currentPage - 1) * state.itemsPerPage,
             state.currentPage * state.itemsPerPage
-          )
+         )
           .map((_, idx) => idx)
       );
       localDispatch({ type: "SET_SELECTED_ROWS", payload: allIndexes });
@@ -268,32 +276,32 @@ const Discovery = () => {
     localDispatch({ type: "TOGGLE_SELECT_ALL", payload: state.selectedRows });
   }, [
     state.devices,
-    state.currentPage,
+   state.currentPage,
     state.itemsPerPage,
     state.selectAll,
     state.selectedRows,
   ]);
 
   const handleRowCheckboxChange = useCallback(
-    (deviceId) => {
+    (hardwareVersion) => {
       localDispatch({
-        type: "SET_SELECTED_DEVICE_ID",
-        payload: state.selectedDeviceId === deviceId ? null : deviceId,
+        type: "SET_SELECTED_HARDWARE_VERSION",
+        payload: state.selectedHardwareVersion === hardwareVersion ? null : hardwareVersion,
       });
     },
-    [state.selectedDeviceId]
+    [state.selectedHardwareVersion]
   );
 
   const handleHealthCheck = useCallback(async () => {
-    if (!state.selectedDeviceId) return;
+    if (!state.selectedHardwareVersion) return;
     try {
       localDispatch({
         type: "SET_HEALTH_STATUS",
-        payload: { [state.selectedDeviceId]: "Checking..." },
+        payload: { [state.selectedHardwareVersion]: "Checking..." },
       });
 
       const response = await fetch(
-        `http://127.0.0.1:5000/v1/devices/healthcheck/${state.selectedDeviceId}`,
+        `http://127.0.0.1:5000/v1/devices/healthcheck/${state.selectedHardwareVersion}`,
         {
           method: "PATCH",
           headers: {
@@ -310,17 +318,17 @@ const Discovery = () => {
       localDispatch({
         type: "SET_HEALTH_STATUS",
         payload: {
-          [state.selectedDeviceId]: result.updated_record?.status || "Unknown",
+          [state.selectedHardwareVersion]: result.updated_record?.status || "Unknown",
         },
       });
     } catch (err) {
       console.error("Error in health check:", err);
       localDispatch({
         type: "SET_HEALTH_STATUS",
-        payload: { [state.selectedDeviceId]: "Error" },
+        payload: { [state.selectedHardwareVersion]: "Error" },
       });
     }
-  }, [state.selectedDeviceId]);
+  }, [state.selectedHardwareVersion]);
 
   const handleItemsPerPageChange = useCallback((value) => {
     localDispatch({ type: "SET_ITEMS_PER_PAGE", payload: value });
@@ -380,6 +388,30 @@ const Discovery = () => {
    
     return devicesToFilter;
 }, [state.devices, state.groupTab,state.activeTab]);
+
+const totalSwitches = useMemo(() => 
+  state.devices.filter(
+    (device) =>
+      device["Inventory_Type"] === "MDS" || 
+      device["Inventory_Type"] === "Nexus 9K"
+  ).length, 
+  [state.devices]
+);
+
+const totalFabricInterconnect = useMemo(() => 
+  state.devices.filter(
+    (device) => device["Inventory_Type"] === "Fabric Interconnect"
+  ).length, 
+  [state.devices]
+);
+
+const totalStorages = useMemo(() => 
+  state.devices.filter(
+    (device) => device["Inventory_Type"] === "Flash Array"
+  ).length, 
+  [state.devices]
+);
+
 
 const filteredDevices = useMemo(() => {
     let devicesToDisplay = getFilteredDevices; 
@@ -453,7 +485,7 @@ const filteredDevices = useMemo(() => {
   );
 
   const handleUpdateTags = useCallback(() => {
-    if (state.selectedDeviceId) {
+    if (state.selectedHardwareVersion) {
       const tagsArray = Array.from(state.selectedTags);
       const tagKeyValuePairs = tagsArray.reduce((acc, tagKey) => {
         const tag = tags.find((t) => t.key === tagKey);
@@ -463,13 +495,13 @@ const filteredDevices = useMemo(() => {
         return acc;
       }, {});
       console.log("Payload:", {
-        ID: state.selectedDeviceId,
+        ID: state.selectedHardwareVersion,
         Tag: tagKeyValuePairs,
       });
-      handleTagAssign(state.selectedDeviceId, tagKeyValuePairs);
+      handleTagAssign(state.selectedHardwareVersion, tagKeyValuePairs);
     }
     localDispatch({ type: "SET_TAGS_DROPDOWN_VISIBLE", payload: false });
-  }, [state.selectedDeviceId, state.selectedTags, tags, handleTagAssign]);
+  }, [state.selectedHardwareVersion, state.selectedTags, tags, handleTagAssign]);
 
   if (state.error) {
     return <div>Error: {state.error}</div>;
@@ -526,7 +558,7 @@ const filteredDevices = useMemo(() => {
                 } border border-orange-400 rounded-l text-sm md:text-base`}
                 onClick={setActiveTabToDiscovered}
               >
-                Discovered Devices
+                Discovered Devices ({state.totalDevices})
               </button>
               <button
                 className={`px-2 md:px-2 py-1 md:py-2 ${
@@ -541,9 +573,9 @@ const filteredDevices = useMemo(() => {
             </div>
             <button
               onClick={handleHealthCheck}
-              disabled={!state.selectedDeviceId}
+              disabled={!state.selectedHardwareVersion}
               className={`mt-2 md:mt-0 px-2 md:px-3 py-1 md:py-2 rounded text-sm md:text-base ${
-                state.selectedDeviceId
+                state.selectedHardwareVersion
                   ? "bg-orange-400 text-white"
                   : "bg-orange-100 cursor-not-allowed"
               }`}
@@ -559,7 +591,7 @@ const filteredDevices = useMemo(() => {
             {state.activeTab === "discovered" && (
               <>
               <div className="w-full overflow-x-auto">
-                <div className="md:max-h-[60vh] sm:max-h-[60vh] overflow-y-auto border-t border-gray-300 xl:w-full w-full h-full">
+                <div className="md:max-h-[60vh] sm:max-h-[60vh] overflow-y-auto border-t border-gray-300 xl:w-full w-full h-full relative">
                   <table className="w-full text-left border-collapse">
                     <thead className="bg-orange-400 text-white sticky top-0 z-10">
                       <tr>
@@ -572,22 +604,19 @@ const filteredDevices = useMemo(() => {
                           />
                         </th>
                         <th className="border px-2 md:px-3 py-1 md:py-2">
-                          Serial ID
-                        </th>
-                        <th className="border px-2 md:px-3 py-1 md:py-2">
                           Inventory Type
                         </th>
                         <th className="border px-2 md:px-3 py-1 md:py-2">
                           Vendor Name
                         </th>
                         <th className="border px-2 md:px-3 py-1 md:py-2">
+                          Hardware Address
+                        </th>
+                        <th className="border px-2 md:px-3 py-1 md:py-2">
                           IP Address
                         </th>
                         <th className="border px-2 md:px-3 py-1 md:py-2">
                           DHCP Lease
-                        </th>
-                        <th className="border px-2 md:px-3 py-1 md:py-2">
-                          DHCP Options
                         </th>
                         <th className="border px-2 md:px-3 py-1 md:py-2">
                           Firmware Version
@@ -628,6 +657,9 @@ const filteredDevices = useMemo(() => {
                           Health Status
                         </th>
                         <th className="border px-2 md:px-3 py-1 md:py-2">
+                          Discovery Type
+                        </th>
+                        <th className="border px-2 md:px-3 py-1 md:py-2">
                           Action
                         </th>
                       </tr>
@@ -651,7 +683,7 @@ const filteredDevices = useMemo(() => {
                       ) : filteredDevices.length > 0 ? (
                         filteredDevices.map((device, index) => (
                           <tr
-                            key={device.ID || index}
+                            key={device["Hardware_Address"] || index}
                             className={`${
                               index % 2 === 0 ? "bg-orange-100" : "bg-white"
                             }`}
@@ -659,10 +691,10 @@ const filteredDevices = useMemo(() => {
                             <td className="border px-2 md:px-3 py-1 md:py-2">
                               <input
                                 type="checkbox"
-                                checked={state.selectedDeviceId === device.ID}
+                                checked={state.selectedHardwareVersion === device["Hardware_Address"]}
                                 onChange={handleRowCheckboxChange.bind(
                                   null,
-                                  device.ID
+                                  device["Hardware_Address"]
                                 )}
                                 className="w-4 h-4"
                               />
@@ -705,9 +737,7 @@ const filteredDevices = useMemo(() => {
                                   </div>
                                 )}
                             </td>
-                            <td className="border px-2 md:px-3 py-1 md:py-2">
-                              {device["Serial_ID"] || "-"}
-                            </td>
+                            
                             <td className="border px-2 md:px-3 py-1 md:py-2">
                               {device["Inventory_Type"] || "-"}
                             </td>
@@ -715,14 +745,15 @@ const filteredDevices = useMemo(() => {
                               {device["Vendor_Name"] || "-"}
                             </td>
                             <td className="border px-2 md:px-3 py-1 md:py-2">
+                              {device["Hardware_Address"] || "-"}
+                            </td>
+                            <td className="border px-2 md:px-3 py-1 md:py-2">
                               {device["IP_Address"] || "-"}
                             </td>
                             <td className="border px-2 md:px-3 py-1 md:py-2">
                               {device["DHCP_Lease"] || "-"}
                             </td>
-                            <td className="border px-2 md:px-3 py-1 md:py-2">
-                              {device["DHCP_Options"] || "-"}
-                            </td>
+                            
                             <td className="border px-2 md:px-3 py-1 md:py-2">
                               {device["Firmware_Version"] || "-"}
                             </td>
@@ -759,16 +790,19 @@ const filteredDevices = useMemo(() => {
                             </td>
 
                             <td className="border px-2 md:px-3 py-1 md:py-2">
-                              {state.healthStatus[device.ID] ||
+                              {state.healthStatus[device["Hardware_Address"]] ||
                                 device["Status"]}
+                            </td>
+                            <td className="border px-2 md:px-3 py-1 md:py-2">
+                              {device["Discovery_Type"] || "-"}
                             </td>
                             <td>
                               <div style={{ position: "relative" }}>
                                 <button
                                   onClick={() => {
                                     localDispatch({
-                                      type: "SET_SELECTED_DEVICE_ID",
-                                      payload: device.ID,
+                                      type: "SET_SELECTED_HARDWARE_VERSION",
+                                      payload: device["Hardware_Address"],
                                     });
                                     localDispatch({
                                       type: "SET_TAGS_DROPDOWN_VISIBLE",
@@ -780,7 +814,7 @@ const filteredDevices = useMemo(() => {
                                   ...
                                 </button>
                                 {state.tagsDropdownVisible &&
-                                  state.selectedDeviceId === device.ID && (
+                                  state.selectedHardwareVersion === device["Hardware_Address"] && (
                                     <div
                                       className="dropdown sticky bg-white shadow-md rounded-lg p-4 w-64 border border-gray-200 z-10"
                                       style={{ position: "absolute", right: 0 }}
@@ -849,7 +883,7 @@ const filteredDevices = useMemo(() => {
                       } border border-orange-400 rounded-l`}
                       onClick={setGroupTabToSwitches}
                     >
-                      Switches
+                      Switches ({totalSwitches})
                     </button>
                     <button
                       className={`px-4 py-2 ${
@@ -859,7 +893,7 @@ const filteredDevices = useMemo(() => {
                       } border border-orange-400`}
                       onClick={setGroupTabToFabric}
                     >
-                      Fabric Interconnect
+                      Fabric Interconnect ({totalFabricInterconnect})
                     </button>
                     <button
                       className={`px-4 py-2 ${
@@ -869,27 +903,25 @@ const filteredDevices = useMemo(() => {
                       } border border-orange-400 rounded-r`}
                       onClick={setGroupTabToStorages}
                     >
-                      Storages
+                      Storages ({totalStorages})
                     </button>
                   </div>
                   
                 </div>
                 <div className="w-full overflow-x-auto">
-                <div className="md:max-h-[50vh] overflow-y-auto border-t border-gray-300 xl:w-full w-full h-full">
-                  <table className="table-auto w-full text-left border-collapse">
-                    <thead className="bg-orange-400 text-white sticky top-0">
+                <div className="md:max-h-[50vh] overflow-y-auto xl:w-full w-full h-full relative">
+                <table className="table-auto w-full text-left border-collapse border border-transparent">
+                  <thead className="bg-orange-400 text-white sticky top-0 z-10 border border-transparent shadow-md bg-[#fbe3c1]">
                       <tr>
                         <th className="border px-2 md:px-3 py-1 md:py-2">
                           <input
                             type="checkbox"
                             checked={state.selectAll}
-                            onChange={handleSelectAllChange}
+                            //onChange={handleSelectAllChange}
                             className="w-4 h-4"
                           />
                         </th>
-                        <th className="border px-2 md:px-3 py-1 md:py-2">
-                          Serial ID
-                        </th>
+                        
                         <th className="border px-2 md:px-3 py-1 md:py-2">
                           Inventory Type
                         </th>
@@ -897,14 +929,15 @@ const filteredDevices = useMemo(() => {
                           Vendor Name
                         </th>
                         <th className="border px-2 md:px-3 py-1 md:py-2">
+                          Hardware Address
+                        </th>
+                        <th className="border px-2 md:px-3 py-1 md:py-2">
                           IP Address
                         </th>
                         <th className="border px-2 md:px-3 py-1 md:py-2">
                           DHCP Lease
                         </th>
-                        <th className="border px-2 md:px-3 py-1 md:py-2">
-                          DHCP Options
-                        </th>
+                        
                         <th className="border px-2 md:px-3 py-1 md:py-2">
                           Firmware Version
                         </th>
@@ -920,11 +953,13 @@ const filteredDevices = useMemo(() => {
                         <th className="border px-2 md:px-3 py-1 md:py-2">
                           Health Status
                         </th>
-                        
+                        <th className="border px-2 md:px-3 py-1 md:py-2">
+                          Discovery Type
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
-                      {getFilteredDevices.map((device, index) => (
+                      {filteredDevices.map((device, index) => (
                         <tr
                           key={index}
                           className={`${
@@ -934,10 +969,10 @@ const filteredDevices = useMemo(() => {
                           <td className="border px-2 md:px-3 py-1 md:py-2">
                             <input
                               type="checkbox"
-                              checked={state.selectedDeviceId === device.ID}
+                              checked={state.selectedHardwareVersion === device["Hardware_Address"]}
                               onChange={handleRowCheckboxChange.bind(
                                 null,
-                                device.ID
+                                device["Hardware_Address"]
                               )}
                               className="w-4 h-4"
                             />
@@ -980,9 +1015,7 @@ const filteredDevices = useMemo(() => {
                                 </div>
                               )}
                           </td>
-                          <td className="border px-2 md:px-3 py-1 md:py-2">
-                            {device["Serial_ID"] || "-"}
-                          </td>
+                          
                           <td className="border px-2 md:px-3 py-1 md:py-2">
                             {device["Inventory_Type"] || "-"}
                           </td>
@@ -990,14 +1023,15 @@ const filteredDevices = useMemo(() => {
                             {device["Vendor_Name"] || "-"}
                           </td>
                           <td className="border px-2 md:px-3 py-1 md:py-2">
+                            {device["Hardware_Address"] || "-"}
+                          </td>
+                          <td className="border px-2 md:px-3 py-1 md:py-2">
                             {device["IP_Address"] || "-"}
                           </td>
                           <td className="border px-2 md:px-3 py-1 md:py-2">
                             {device["DHCP_Lease"] || "-"}
                           </td>
-                          <td className="border px-2 md:px-3 py-1 md:py-2">
-                            {device["DHCP_Options"] || "-"}
-                          </td>
+                          
                           <td className="border px-2 md:px-3 py-1 md:py-2">
                             {device["Firmware_Version"] || "-"}
                           </td>
@@ -1033,9 +1067,11 @@ const filteredDevices = useMemo(() => {
                               })()}
                             </td>
                           <td className="border px-2 md:px-3 py-1 md:py-2">
-                            {state.healthStatus[device.ID] || device["Status"]}
+                            {state.healthStatus[device["Hardware_Address"]] || device["Status"]}
                           </td>
-                          
+                          <td className="border px-2 md:px-3 py-1 md:py-2">
+                            {device["Discovery_Type"] || "-"}
+                          </td>
                         </tr>
                       ))}
                     </tbody>

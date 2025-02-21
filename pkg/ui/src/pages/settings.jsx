@@ -89,7 +89,7 @@ const Settings = () => {
       dispatch(deleteTag(id));
       toast.success("Tag deleted successfully!");
     } catch (error) {
-      toast.error("Tag is linked to devices and cannot be deleted Please uncheck it");
+      toast.error(`Error deleting tag: ${error.message}`);
     }
   };
 
@@ -138,7 +138,7 @@ const Settings = () => {
         </button>
       </div>
 
-      <div className="bg-orange-100 w-full max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl p-4 md:p-6 rounded-2xl shadow-lg transition-all">
+      <div className="bg-orange-100 w-full max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl p-4 md:p-6 overflow-auto rounded-2xl shadow-lg transition-all">
         <h2 className="text-2xl md:text-2xl font-semibold text-gray-800 text-center pb-2">
           List of Available Tags
         </h2>

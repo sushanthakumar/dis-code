@@ -12,13 +12,12 @@ from paramiko import SSHClient, AutoAddPolicy, SFTPClient
 from datetime import datetime
 import time
 from utils.scn_log import logger
-
-
+from constants import DHCP_HOST_DETAILS
+from utils.dhcp_ops import dhcp_ops_get_lease_file_name
 # Constants
 CWD = os.path.dirname(os.path.abspath(__file__))
 
 CWD = os.path.dirname(os.path.abspath(__file__))
-DHCP_HOST_DETAILS = "/tmp/dhcp_host.conf"
 
 
 DHCP_LEASE_FILE = CWD+"/data/dhcpd.leases"
@@ -26,7 +25,7 @@ REPETITIONS = 10
 
 
 # Function to fetch the DHCP lease file from the DHCP server
-def fetch_dhcp_leases_via_ssh(dhcp_server_ip, username, password, remote_path, local_path, port):
+def fetch_dhcp_leases_via_ssh(dhcp_server_ip, username, password, local_path, port):
     """Fetches the DHCP lease file from a remote DHCP server using SSH."""
     logger.debug("Fetching DHCP lease file from the DHCP server.")
     try:
@@ -38,6 +37,9 @@ def fetch_dhcp_leases_via_ssh(dhcp_server_ip, username, password, remote_path, l
         # Remove local_path
         if os.path.exists(local_path):
             os.remove(local_path)
+
+        # Get lease file
+        remote_path = dhcp_ops_get_lease_file_name(client)
         # Use SFTP to download the lease file
         sftp = client.open_sftp()
         logger.debug(f"Fetching lease file from {remote_path}...")
@@ -52,6 +54,44 @@ def fetch_dhcp_leases_via_ssh(dhcp_server_ip, username, password, remote_path, l
         return None
 
 # Function to parse the DHCP lease file
+def parse_dhcp_leases_data(lease_data):
+
+    devices_info = []
+    # Regular expressions
+    lease_pattern = re.compile(r"lease (\d+\.\d+\.\d+\.\d+) {")
+    starts_pattern = re.compile(r"starts \d+ (\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2});")
+    ends_pattern = re.compile(r"ends \d+ (\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2});")
+    hardware_pattern = re.compile(r"hardware ethernet ([\da-fA-F:]+);")
+    uid_pattern = re.compile(r'uid "\000([^";]+)(?:;([^"]+))?";')
+    vendor_pattern = re.compile(r'set vendor-class-identifier = "([^"]+)";')
+
+    # Parse leases
+    leases = lease_data.split("lease ")[1:]  # Split data by 'lease' and ignore the first empty split
+
+    for lease in leases:
+        ip_match = lease_pattern.search("lease " + lease)
+        starts_match = starts_pattern.search(lease)
+        ends_match = ends_pattern.search(lease)
+        hardware_match = hardware_pattern.search(lease)
+        uid_match = uid_pattern.search(lease)
+        vendor_match = vendor_pattern.search(lease)
+
+        if hardware_match:  # Only process if hardware is present
+            ip_address = ip_match.group(1) if ip_match else "N/A"
+            starts = starts_match.group(1) if starts_match else "N/A"
+            ends = ends_match.group(1) if ends_match else "N/A"
+            hardware = hardware_match.group(1) if hardware_match else "N/A"
+            uid = uid_match.group(1) if uid_match else "N/A"
+            vendor = (
+                vendor_match.group(1)
+                if vendor_match
+                else (uid_match.group(2) if uid_match and uid_match.group(2) else "N/A")
+            )
+        devices_info.append((ip_address, starts, ends, hardware, vendor))
+    return devices_info
+
+
+# Function to parse the DHCP lease file
 def parse_dhcp_leases(lease_file="dhcpd.leases"):
     devices = []
     try:
@@ -59,10 +99,19 @@ def parse_dhcp_leases(lease_file="dhcpd.leases"):
             content = file.read()
             # Ignore commented lines
             content = '\n'.join([line for line in content.splitlines() if not line.strip().startswith("#")])
-            leases = re.findall(r'lease\s(?P<ip>\d+\.\d+\.\d+\.\d+)\s\{[\s\S]*?starts\s\d\s(?P<start_time>[\d\/\:\s]+);[\s\S]*?ends\s\d\s(?P<end_time>[\d\/\:\s]+);[\s\S]*?hardware\s\w+\s(?P<mac>[a-fA-F0-9:]+);(?:[\s\S]*?set vendor-class-identifier\s*=\s\"(?P<inventory_type>.*?)\";)?', content, re.DOTALL)
+            
+            logger.debug(f"*"*50)
+            logger.debug(f"Content: {content}")
+            logger.debug(f"*"*50)
 
-            #list(map(print, leases))
-            for lease in leases:
+            parsed_devices = parse_dhcp_leases_data(content)
+
+            logger.debug(f"*"*50)
+            logger.debug(f"parsed_devices: {parsed_devices}")
+            logger.debug(f"*"*50)
+
+            #list(map(print, parsed_devices))
+            for lease in parsed_devices:
                 print(lease)
                 if len(lease) == 5:
                     ip, start_time, stop_time, mac, inventory_type = lease
@@ -129,7 +178,6 @@ def scan_devices():
     lease_file = fetch_dhcp_leases_via_ssh(DHCPServerDetails["ip"], 
                                            DHCPServerDetails["username"], 
                                            DHCPServerDetails["password"],
-                                           remote_path=DHCPServerDetails["lease_file"],
                                            local_path=DHCP_LEASE_FILE,
                                            port = DHCPServerDetails["port"])
     if not lease_file:
