@@ -15,15 +15,15 @@ class DHCPService:
     # Define the constructor to initialize the DHCP server IP, username, and password and port number
     def __init__(self):
         self.client = None
-        # Read the configuration json file to get ip, username, password and port
-        self.__dhcp_details = json.load(open(DHCP_HOST_CONFIG_FILE))
 
     # Define a method to connect to the DHCP server and keep client object
     def connect(self):
         logger.info("Connecting to the DHCP server...")
+        # Read the configuration json file to get ip, username, password and port
+        dhcp_details = json.load(open(DHCP_HOST_CONFIG_FILE))
+
         """Connect to the DHCP server."""
         try:
-            dhcp_details = self.__dhcp_details
             print("### Read data from file: ", dhcp_details)
             print(f"Connecting to the DHCP server at {dhcp_details['ip']}...")
             self.client = paramiko.SSHClient()

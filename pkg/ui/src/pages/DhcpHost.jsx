@@ -15,13 +15,14 @@ const DhcpHost = () => {
       return;
     }
 
-    const formData = new FormData();
-    formData.append('file', file);
-
     try {
       const response = await fetch('http://127.0.0.1:5000/v1/dhcpdconf', {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': file.type || 'application/octet-stream', 
+          'X-File-Name': file.name, // Send filename in header
+        },
+        body: await file.arrayBuffer(), // Send raw file content
       });
 
       if (response.ok) {

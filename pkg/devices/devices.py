@@ -71,11 +71,12 @@ class ScnDevicesDb:
         for device in self.devices_meta_data:
             device["Discovery Type"] = "Simulated"
 
-        # Get Devices IPs from DHCP server (lease file)
-        self.devices = dhcp_connector.scan_devices()
-        logger.debug(f"Devices from DHCP server: {self.devices}")
-        # Connect to each device using IP and Host Name as metioned in connectors/
-        self.__get_device_meta_data() 
+        if self.DHCP_SERVICE_ENABLE:
+            # Get Devices IPs from DHCP server (lease file)
+            self.devices = dhcp_connector.scan_devices()
+            logger.debug(f"Devices from DHCP server: {self.devices}")
+            # Connect to each device using IP and Host Name as metioned in connectors/
+            self.__get_device_meta_data() 
 
         cursor = self.db_connection.cursor()
         for device in self.devices_meta_data:

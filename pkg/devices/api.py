@@ -348,6 +348,7 @@ class dhcp_service_start(Resource):
         try:
             dhcp_service.start()
             logger.debug("DHCP service started successfully.")
+            devices_db.DHCP_SERVICE_ENABLE = True
             return {"message": "DHCP service started successfully."}, 200
         except Exception as e:
             logger.error("Error starting DHCP service: %s", e)
@@ -366,6 +367,7 @@ class dhcp_service_stop(Resource):
         try:
             dhcp_service.stop()
             logger.debug("DHCP service stopped successfully.")
+            devices_db.DHCP_SERVICE_ENABLE = False            
             return {"message": "DHCP service stopped successfully."}, 200
         except Exception as e:
             logger.error(f"Error stopping DHCP service: %s", e)
@@ -419,7 +421,7 @@ class new_upload(Resource):
 
 # Write API to handle the data dhcpd.conf file upload.
 # The data comes as a string in the request body.
-# Write content to the file constants.DHCPD_CONFIG_FILE
+# Write content to the file constants.DHCP_HOST_CONFIG_FILE
 # Return success message if the file is written successfully.
 # Return error message if the file write fails.
 @api.route('/v1/dhcpdconf')
@@ -433,14 +435,18 @@ class DhcpdConf(Resource):
         try:
             # Read the file content directly without saving
             file_content = request.data.decode('utf-8')
+            logger.debug(f"Going to copy to file: {constants.DHCP_HOST_CONFIG_FILE}")
+            logger.debug(f"File Content: {file_content}")
+            logger.debug(f"File Content: {request.data}")
 
             # Write extracted content to new file
-            with open(constants.DHCPD_CONFIG_FILE, 'w', encoding='utf-8') as f:
+            with open(constants.DHCP_HOST_CONFIG_FILE, 'w', encoding='utf-8') as f:
+                logger.debug(f"Opened file {constants.DHCP_HOST_CONFIG_FILE}")
                 f.write(file_content)
 
             return {
                 "message": "File content extracted and stored successfully",
-                "saved_file": constants.DHCPD_CONFIG_FILE
+                "saved_file": constants.DHCP_HOST_CONFIG_FILE
             }, 200
 
         except Exception as e:
@@ -449,7 +455,7 @@ class DhcpdConf(Resource):
 
 # Write API to handle the data for dhcp server details
 # The data comes as a string in the request body.
-# Write content to the file constants.DHCP_SERVER_FILE
+# Write content to the file constants.DHCPD_CONFIG_FILE
 # Return success message if the file is written successfully.
 @api.route('/v1/dhcpserver')
 class DhcpServer(Resource):
@@ -462,17 +468,20 @@ class DhcpServer(Resource):
         try:
             # Read the file content directly without saving
             file_content = request.data.decode('utf-8')
+            logger.debug(f"Going to copy to file: {constants.DHCPD_CONFIG_FILE}")
+            logger.debug(f"File Content: {file_content}")
 
             # Write extracted content to new file
-            with open(constants.DHCP_SERVER_FILE, 'w', encoding='utf-8') as f:
+            with open(constants.DHCPD_CONFIG_FILE, 'w', encoding='utf-8') as f:
                 f.write(file_content)
 
             return {
                 "message": "File content extracted and stored successfully",
-                "saved_file": constants.DHCP_SERVER_FILE
+                "saved_file": constants.DHCPD_CONFIG_FILE
             }, 200
 
         except Exception as e:
+            logger.debug(f"Error while copying to file {e}")
             return {"error": str(e)}, 500
 
 
