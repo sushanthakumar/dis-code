@@ -48,7 +48,7 @@ class Scan(Resource):
     @api.response(500, "Internal Server Error.")
     def get(self):
         """Function to scan the list of devices"""
-        logger.debug("synclist: Scanning for devices...")
+        logger.debug("synclist: Scanning for devices... API: /v1/synclist")
         try:
             devices_list = devices_db.delete_devices()
             devices_list = devices_db.scan_and_update()
@@ -68,7 +68,7 @@ class List(Resource):
     @api.response(500, "Internal Server Error.")
     def get(self):
         """Function to retrieve the list of devices"""
-        logger.debug("devices: Retrieving devices list...")
+        logger.debug("Received API request to retrieve devices list, API: /v1/devices")
         try:
             devices_list = devices_db.get_devices_list()
             logger.debug(f"Length of devices_list: {len(devices_list)}")
@@ -94,7 +94,7 @@ class UploadCSV(Resource):
     def post(self):
         """Function to save devices file in the database"""
         try:
-
+            logger.debug("Received file upload request...API : /v1/devices/upload")
             file_path = "/tmp/devices/add_device.csv"
             file_path = "/tmp/devices/add_device.csv"
             logger.debug("Received file path:%s", file_path)
@@ -126,8 +126,7 @@ class UploadCSV(Resource):
             cursor.execute("DELETE FROM device_db WHERE Discovery_Type = 'Static'")
             print("Deleted the devices from the database whos device type is Static")
             # Iterate over each row in the CSV file
-            cursor.execute("DELETE FROM device_db WHERE Device_Type = 'Static'")
-            print("Deleted the devices from the database whos device type is Static")
+           
             for _, device in csv_data.iterrows():
                 try:
                     hardware_address = device["Hardware Address"]
@@ -173,7 +172,7 @@ class UploadCSV(Resource):
 @api.expect(model_list)
 class device_tag(Resource):
     def patch(self, id):
-        
+        logger.debug(f"Received API request to update tags for device ID: {id}, API: /v1/devices/<id>/tags")
         data = request.json
         tags = data.get("Tag", {})
         conn = devices_db.establish_db_conn()
@@ -232,6 +231,7 @@ class Healthcheck(Resource):
     def patch(self,id):
         logger.debug("Updating device status...")
         try:
+            logger.debug(f"Received API request to update device status for ID: {id}, API: /v1/devices/healthcheck/<id>")
             conn = devices_db.establish_db_conn()
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM device_db WHERE Hardware_Address = ?", (id,))
@@ -286,6 +286,7 @@ class tag(Resource):
     def post(self):
         logger.debug("Creating a new tag...")
         try:
+            logger.debug(f"Request JSON: {request.json}, API: /v1/customtags")
             data = request.json
             conn = devices_db.establish_db_conn()
             cursor = conn.cursor()
@@ -310,10 +311,7 @@ class tag(Resource):
     @api.response(404, "Tag not found.")
     def delete(self):
         ID = request.args.get('id')
-
-        # Debugging: Print the received name
-        print(f"Received ID: {ID}")
-
+        logger.debug(f"Received API request to delete tag with ID: {ID}, API: /v1/customtags")
         if not ID:
             return {"result": "Tag id is required."}, 400
 
@@ -346,8 +344,7 @@ class dhcp_service_start(Resource):
     @api.response(200, "DHCP service started successfully.")
     @api.response(500, "Internal Server Error.")
     def patch(self):
-        print("Patch Starting the DHCP service...")
-        sys.stdout.flush()
+        logger.debug("Patch Starting the DHCP service... API: /v1/dhcpservice/start")
         try:
             dhcp_service.start()
             logger.debug("DHCP service started successfully.")
@@ -365,7 +362,7 @@ class dhcp_service_stop(Resource):
     @api.response(200, "DHCP service stopped successfully.")
     @api.response(500, "Internal Server Error.")
     def patch(self):
-        print("Patch Stopping the DHCP service...")
+        logger.debug("Stopping the DHCP service... API: /v1/dhcpservice/stop")
         try:
             dhcp_service.stop()
             logger.debug("DHCP service stopped successfully.")
@@ -380,14 +377,16 @@ class dhcp_service_stop(Resource):
 @api.doc(description="devices.")
 class upload(Resource):
     def post(self):
+        logger.debug("Received file upload request...API : /v1/upload")
             #Loads data from the Recommendations file
-        logger.debug("Headers ----> : ", request.headers)
+        logger.debug(f"Headers ----> : {request.headers}")
         return
 
 @api.route('/v1/new_upload')
 @api.doc(description="devices.")
 class new_upload(Resource):
     def post(self):
+        logger.debug("Received file upload request...API : /v1/new_upload")
         if 'file' not in request.files:
             return {"error": "No file part"}, 400
 
@@ -396,6 +395,8 @@ class new_upload(Resource):
         if file.filename == '':
             return {"error": "No selected file"}, 400
 
+        logger.debug(f"Received file: {file.filename}")
+        
         try:
             # Read the file content directly without saving
             file_content = file.read().decode('utf-8')
@@ -415,7 +416,65 @@ class new_upload(Resource):
         except Exception as e:
             return {"error": str(e)}, 500
 
-    
+
+# Write API to handle the data dhcpd.conf file upload.
+# The data comes as a string in the request body.
+# Write content to the file constants.DHCPD_CONFIG_FILE
+# Return success message if the file is written successfully.
+# Return error message if the file write fails.
+@api.route('/v1/dhcpdconf')
+class DhcpdConf(Resource):
+    @api.doc(description="Upload dhcpd.conf file.")
+    @api.response(200, "File uploaded successfully.")
+    @api.response(400, "Invalid file path or format.")
+    @api.response(500, "Internal server error.")
+    def post(self):
+        logger.debug("Received file upload request...API : /v1/dhcpdconf")
+        try:
+            # Read the file content directly without saving
+            file_content = request.data.decode('utf-8')
+
+            # Write extracted content to new file
+            with open(constants.DHCPD_CONFIG_FILE, 'w', encoding='utf-8') as f:
+                f.write(file_content)
+
+            return {
+                "message": "File content extracted and stored successfully",
+                "saved_file": constants.DHCPD_CONFIG_FILE
+            }, 200
+
+        except Exception as e:
+            return {"error": str(e)}, 500
+
+
+# Write API to handle the data for dhcp server details
+# The data comes as a string in the request body.
+# Write content to the file constants.DHCP_SERVER_FILE
+# Return success message if the file is written successfully.
+@api.route('/v1/dhcpserver')
+class DhcpServer(Resource):
+    @api.doc(description="Upload dhcp server details.")
+    @api.response(200, "File uploaded successfully.")
+    @api.response(400, "Invalid file path or format.")
+    @api.response(500, "Internal server error.")
+    def post(self):
+        logger.debug("Received file upload request...API : /v1/dhcpserver")
+        try:
+            # Read the file content directly without saving
+            file_content = request.data.decode('utf-8')
+
+            # Write extracted content to new file
+            with open(constants.DHCP_SERVER_FILE, 'w', encoding='utf-8') as f:
+                f.write(file_content)
+
+            return {
+                "message": "File content extracted and stored successfully",
+                "saved_file": constants.DHCP_SERVER_FILE
+            }, 200
+
+        except Exception as e:
+            return {"error": str(e)}, 500
+
 
 # Run the app
 if __name__ == '__main__':

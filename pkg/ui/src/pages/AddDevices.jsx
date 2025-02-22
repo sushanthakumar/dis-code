@@ -37,7 +37,7 @@ const AddDevices = () => {
 
   
   const handleOkClick = () => {
-    fetch('http://127.0.0.1:5000/v1/upload', {
+    fetch('http://127.0.0.1:5000/v1/devices/upload', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

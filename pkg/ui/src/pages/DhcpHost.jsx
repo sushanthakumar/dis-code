@@ -19,7 +19,7 @@ const DhcpHost = () => {
     formData.append('file', file);
 
     try {
-      const response = await fetch('/dhcp-host-upload', {
+      const response = await fetch('http://127.0.0.1:5000/v1/dhcpdconf', {
         method: 'POST',
         body: formData,
       });
