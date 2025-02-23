@@ -19,24 +19,29 @@ class DHCPService:
     # Define a method to connect to the DHCP server and keep client object
     def connect(self):
         logger.info("Connecting to the DHCP server...")
-        # Read the configuration json file to get ip, username, password and port
-        dhcp_details = json.load(open(DHCP_HOST_CONFIG_FILE))
-
+        
         """Connect to the DHCP server."""
         try:
+            # Read the configuration json file to get ip, username, password and port
+            dhcp_details = json.load(open(DHCP_HOST_CONFIG_FILE))
+            logger.debug(f"DHCP server details: {dhcp_details}")
+
             print("### Read data from file: ", dhcp_details)
             print(f"Connecting to the DHCP server at {dhcp_details['ip']}...")
             self.client = paramiko.SSHClient()
             self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-
-            self.sevice_name = dhcp_ops_get_service_name(self.client)
-            logger.info(f"Service name: {self.service_name}")
-
+            
             self.client.connect(dhcp_details["ip"], 
                                 port=dhcp_details["port"], 
                                 username=dhcp_details["username"], 
                                 password=dhcp_details["password"], 
                                 timeout=10)
+            logger.debug(f"Client details {self.client}...")
+
+            self.service_name = dhcp_ops_get_service_name(self.client)
+
+            logger.info(f"Service name: {self.service_name}")
+
         
         except Exception as e:
             logger.info(f"Error connecting to the DHCP server: {e}")

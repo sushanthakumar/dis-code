@@ -24,10 +24,16 @@ class OS:
 
 def get_os_name(client):
     try:
+        logger.debug(f"Getting OS name... with client = {client}")
         # Check if /etc/os-release file exists (Works for CentOS, Ubuntu, Debian, etc.)
-        stdin, stdout, stderr = client.exec_command("cat /etc/os-release 2>/dev/null")
-        os_info = stdout.read().decode().strip()
+        #stdin, stdout, stderr = client.exec_command("cat /etc/os-release 2>/dev/null")
 
+        # Check if /etc/os-release file exists (Works for CentOS, Ubuntu, Debian, etc.)
+
+        stdin, stdout, stderr = client.exec_command("cat /etc/os-release 2>/dev/null")
+        
+        os_info = stdout.read().decode().strip()
+        logger.debug(f"OS Info: {os_info}")
         os_name = "Unknown"
         if os_info:
             for line in os_info.split("\n"):
