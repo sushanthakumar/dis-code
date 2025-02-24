@@ -69,13 +69,15 @@ function reducer(state, action) {
       return { ...state, selectedHardwareVersion: action.payload };      
     case "UPDATE_DEVICE_TAG":
       return {
-        ...state,
-        devices: state.devices.map((device) =>
-          device["Hardware_Address"] === action.payload.hardwareVersion
-            ? { ...device, Tag: action.payload.tagKeyValue }
-            : device
-        ),
-      };
+          ...state,
+          devices: state.devices.map((device) =>
+            device["Hardware_Address"] === action.payload.hardwareVersion
+              ? { ...device, Tag: action.payload.tagKeyValue || "" } // If empty, remove tag
+              : device
+          ),
+        };
+
+      
     case "SET_HEALTH_STATUS":
       return {
         ...state,
@@ -118,8 +120,32 @@ const Discovery = () => {
     localDispatch({ type: "SET_SEARCH_INPUT", payload: e.target.value });
   }, []);
 
-  const handleReload = useCallback(() => {
-    window.location.reload();
+  const handleReload = useCallback(async () => {
+    try {
+      localDispatch({ type: "SET_LOADING", payload: true });
+  
+      // Call synclist API
+      const scanResponse = await fetch("http://127.0.0.1:5000/v1/synclist");
+      if (!scanResponse.ok)
+        throw new Error(`Scan Error: ${scanResponse.statusText}`);
+      await scanResponse.json();
+  
+      // Fetch updated devices list after sync
+      const listResponse = await fetch("http://127.0.0.1:5000/v1/devices");
+      if (!listResponse.ok)
+        throw new Error(`List Error: ${listResponse.statusText}`);
+  
+      const listData = await listResponse.json();
+  
+      console.log("Updated Device List:", listData);
+      localDispatch({ type: "SET_TOTAL_DEVICES", payload: listData.length });
+      localDispatch({ type: "SET_DEVICES", payload: listData });
+    } catch (error) {
+      console.error("Error refreshing device list:", error);
+      localDispatch({ type: "SET_ERROR", payload: error.message });
+    } finally {
+      localDispatch({ type: "SET_LOADING", payload: false });
+    }
   }, []);
 
   const setActiveTabToDiscovered = useCallback(() => {
@@ -183,15 +209,8 @@ const Discovery = () => {
     const fetchData = async () => {
       localDispatch({ type: "SET_LOADING", payload: true });
       try {
-        await Promise.all([
-          fetchTags(),
-          (async () => {
-            const scanResponse = await fetch("http://127.0.0.1:5000/v1/synclist");
-            if (!scanResponse.ok)
-              throw new Error(`Scan Error: ${scanResponse.statusText}`);
-            await scanResponse.json();
-          })(),
-        ]);
+        await fetchTags();
+      
 
         const listResponse = await fetch("http://127.0.0.1:5000/v1/devices");
         if (!listResponse.ok)
@@ -226,7 +245,7 @@ const Discovery = () => {
             "Content-Type": "application/json",
             accept: "application/json",
           },
-          body: JSON.stringify({ Tag: tagKeyValue }),
+          body: JSON.stringify({ Tag: tagKeyValue || null }), // Send null if empty
         }
       );
 
@@ -234,28 +253,32 @@ const Discovery = () => {
         throw new Error(`Failed to assign tag: ${response.statusText}`);
       }
 
+      // Update the local state immediately
       localDispatch({
         type: "UPDATE_DEVICE_TAG",
-        payload: { hardwareVersion, tagKeyValue },
+        payload: { hardwareVersion, tagKeyValue: tagKeyValue || "" }, // Empty string removes the tag
       });
+
       localDispatch({
         type: "SET_NOTIFICATION",
-        payload: "Tag assigned successfully!",
+        payload: tagKeyValue ? "Tag assigned successfully!" : "Tag removed successfully!",
       });
+
       setTimeout(() => {
         localDispatch({ type: "SET_NOTIFICATION", payload: "" });
       }, 3000);
-      console.log("Tag assigned successfully!");
+
+      console.log("Tag assigned/removed successfully!");
     } catch (error) {
       console.error("Error assigning tag:", error);
       localDispatch({
         type: "SET_NOTIFICATION",
         payload: "Failed to assign tag.",
       });
+
       setTimeout(() => {
         localDispatch({ type: "SET_NOTIFICATION", payload: "" });
       }, 3000);
-      console.log("Failed to assign tag.");
     }
   }, []);
 
@@ -616,9 +639,6 @@ const filteredDevices = useMemo(() => {
                           IP Address
                         </th>
                         <th className="border px-2 md:px-3 py-1 md:py-2">
-                          DHCP Lease
-                        </th>
-                        <th className="border px-2 md:px-3 py-1 md:py-2">
                           Firmware Version
                         </th>
                         <th className="border px-2 md:px-3 py-1 md:py-2">
@@ -750,9 +770,6 @@ const filteredDevices = useMemo(() => {
                             <td className="border px-2 md:px-3 py-1 md:py-2">
                               {device["IP_Address"] || "-"}
                             </td>
-                            <td className="border px-2 md:px-3 py-1 md:py-2">
-                              {device["DHCP_Lease"] || "-"}
-                            </td>
                             
                             <td className="border px-2 md:px-3 py-1 md:py-2">
                               {device["Firmware_Version"] || "-"}
@@ -766,28 +783,27 @@ const filteredDevices = useMemo(() => {
                             <td className="border px-2 md:px-3 py-1 md:py-2">
                               {(() => {
                                 try {
-                                  // Parse the JSON string safely
                                   const parsedTags = JSON.parse(device["Tags"] || "[]");
 
-                                  // If it's an array, merge all objects into a single object
-                                  if (Array.isArray(parsedTags)) {
+                                  if (Array.isArray(parsedTags) && parsedTags.length > 0) {
                                     const mergedTags = parsedTags.reduce((acc, tag) => {
-                                      return { ...acc, ...JSON.parse(tag) }; // Parse each string and merge
+                                      return { ...acc, ...JSON.parse(tag) };
                                     }, {});
 
-                                    // Convert the merged object into "key:value" format
                                     return Object.entries(mergedTags)
                                       .map(([key, value]) => `${key}:${value}`)
                                       .join(", ");
                                   }
 
-                                  return "-"; // Default fallback
+                                  return "-"; // Show "-" if no tags are assigned
                                 } catch (error) {
                                   console.error("Error parsing Tags:", error);
-                                  return "-"; // In case of error, return "-"
+                                  return "-";
                                 }
                               })()}
                             </td>
+
+
 
                             <td className="border px-2 md:px-3 py-1 md:py-2">
                               {state.healthStatus[device["Hardware_Address"]] ||
@@ -935,10 +951,6 @@ const filteredDevices = useMemo(() => {
                           IP Address
                         </th>
                         <th className="border px-2 md:px-3 py-1 md:py-2">
-                          DHCP Lease
-                        </th>
-                        
-                        <th className="border px-2 md:px-3 py-1 md:py-2">
                           Firmware Version
                         </th>
                         <th className="border px-2 md:px-3 py-1 md:py-2">
@@ -1027,9 +1039,6 @@ const filteredDevices = useMemo(() => {
                           </td>
                           <td className="border px-2 md:px-3 py-1 md:py-2">
                             {device["IP_Address"] || "-"}
-                          </td>
-                          <td className="border px-2 md:px-3 py-1 md:py-2">
-                            {device["DHCP_Lease"] || "-"}
                           </td>
                           
                           <td className="border px-2 md:px-3 py-1 md:py-2">

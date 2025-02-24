@@ -13,20 +13,26 @@ const Recommend = () => {
     const fetchUsecases = async () => {
       try {
         const response = await fetch("http://127.0.0.1:5001/v1/usecases/recommendations");
+        
         if (!response.ok) {
+          // If response is a client/server error, set custom message
+          if (response.status >= 400 && response.status < 500) {
+            throw new Error("No recommended use cases");
+          }
           throw new Error("Failed to fetch data");
         }
+
         const data = await response.json();
         setUsecases(data.recommendations);
       } catch (err) {
-        setError(err.message);
+        setError(err.message || "No recommended use cases");
       } finally {
         setLoading(false);
       }
     };
 
     fetchUsecases();
-  }, []);
+}, []);
 
   const handleViewMore = useDebouncedCallback(async (usecaseId) => {
     

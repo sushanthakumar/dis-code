@@ -10,6 +10,6 @@ health_check_Offline = "Offline"
 Simulated_devicetype = "Simulated"
 required_columns_add_device = [
                         "Inventory Type", "Vendor Name", "Hardware Address", "IP Address", 
-                        "DHCP Lease", "Firmware Version", 
+                        "Firmware Version", 
                         "Software Version", "Hardware Model"
             ]

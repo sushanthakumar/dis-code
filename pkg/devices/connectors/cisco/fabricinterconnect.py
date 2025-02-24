@@ -19,9 +19,9 @@ CREDENTIALS_PATH = os.path.join(os.path.dirname(__file__), "../login_details/cre
 
 # Define the parameters to be fetched from the devices using SSH, and the corresponding commands and regex patterns
 param_against_file ={
-    "Firmware Version": {"cmd": "show version", "regex":r"(.*)"},
-    "Software Version": {"cmd": "connect nxos", "regex":r'NXOS:\s*version\s*([\d\.N\(\)a-zA-Z]+)'},
-    "Hardware Model": {"cmd": "connect nxos", "regex":r"Hardware\s*\n\s*(cisco\s+[\w\-]+[\w\-]+[\d])"}
+    "Firmware Version": {"cmd": "show version", "regex":r".*:(.*)"},
+    # "Software Version": {"cmd": "connect nxos", "regex":r'NXOS:\s*version\s*([\d\.N\(\)a-zA-Z]+)'},
+    # "Hardware Model": {"cmd": ["connect nxos","show version"], "regex":r"Hardware\s*\n\s*(cisco\s+[\w\-]+[\w\-]+[\d])"}
 }
 
 class DeviceInfo(DeviceInfoPlugin):
@@ -38,7 +38,7 @@ class DeviceInfo(DeviceInfoPlugin):
         # Get the IP Address from the deviceInfo
         ip = deviceInfo.get("IP Address")
         deviceInfo["Vendor Name"] = "Cisco"
-
+        deviceInfo["AutoGrp"] = "Fabric Interconnect"
         try:
             ssh = SSHClient()
             ssh.load_system_host_keys()
@@ -47,7 +47,9 @@ class DeviceInfo(DeviceInfoPlugin):
 
             # Get the device information from the MDS
             for key, value in param_against_file.items():
+                
                 stdin, stdout, stderr = ssh.exec_command(value["cmd"])
+
                 output = stdout.read().decode('utf-8')
                 # Update the deviceInfo with the fetched information or add None if not found
                 if re.search(value["regex"], output,  re.IGNORECASE | re.DOTALL):

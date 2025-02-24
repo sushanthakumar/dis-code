@@ -17,9 +17,8 @@ CREDENTIALS_PATH = os.path.join(os.path.dirname(__file__), "../login_details/cre
 
 # Define the parameters to be fetched from the devices using SSH, and the corresponding commands and regex patterns
 param_against_file ={
-    "Firmware Version": {"cmd": "Firmware_Version", "regex":r"(.*)"},
     "Software Version": {"cmd": "purearray list", "regex":r'Purity//FA\s+(\d+\.\d+\.\d+)'},
-    "Hardware Model": {"cmd": "cat /proc/cpuinfo", "regex":r"model name\s+:(.*)"}
+    #"Hardware Model": {"cmd": "cat /proc/cpuinfo", "regex":r"model name\s+:(.*)"}
     }
 
 class DeviceInfo(DeviceInfoPlugin):
@@ -36,6 +35,7 @@ class DeviceInfo(DeviceInfoPlugin):
         # Get the IP Address from the deviceInfo
         ip = deviceInfo.get("IP Address")
         deviceInfo["Vendor Name"] = "Pure Storage"
+        deviceInfo["AutoGrp"] = "Storage"
         try:
             ssh = SSHClient()
             ssh.load_system_host_keys()
@@ -49,7 +49,8 @@ class DeviceInfo(DeviceInfoPlugin):
                 # Update the deviceInfo with the fetched information or add None if not found
                 if re.search(value["regex"], output,  re.IGNORECASE | re.DOTALL):
                     # Update key value in deviceInfo with the fetched value if key is not there, add it
-                    deviceInfo[key] = re.search(value["regex"], output,  re.IGNORECASE | re.DOTALL).group(1)
+                    extracted_value = re.search(value["regex"], output,  re.IGNORECASE | re.DOTALL).group(1)
+                    deviceInfo[key] = f"Purity//FA {extracted_value}" if key == "Software Version" else extracted_value
                 else:
                     deviceInfo[key] = None
             ssh.close()

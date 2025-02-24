@@ -26,8 +26,7 @@ class DHCPService:
             dhcp_details = json.load(open(DHCP_HOST_CONFIG_FILE))
             logger.debug(f"DHCP server details: {dhcp_details}")
 
-            print("### Read data from file: ", dhcp_details)
-            print(f"Connecting to the DHCP server at {dhcp_details['ip']}...")
+            logger.debug(f"Connect: Read data from file: {dhcp_details}")
             self.client = paramiko.SSHClient()
             self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             
@@ -40,13 +39,13 @@ class DHCPService:
 
             self.service_name = dhcp_ops_get_service_name(self.client)
 
-            logger.info(f"Service name: {self.service_name}")
+            logger.debug(f"Service name: {self.service_name}")
 
         
         except Exception as e:
-            logger.info(f"Error connecting to the DHCP server: {e}")
+            logger.debug(f"Error connecting to the DHCP server: {e}")
         else:
-            logger.info("Connected to the DHCP server successfully.")
+            logger.debug("Connected to the DHCP server successfully.")
     
     # Define a method to execute the command on the DHCP server
     def __execute_command(self, command):
@@ -57,17 +56,18 @@ class DHCPService:
             # Print the output of the command
             print(stdout.read().decode())
         except Exception as e:
-            print(f"Error executing the command: {e}")
+            logger.debug(f"Error executing the command: {e}")
         else:
-            print(f"Command executed successfully: {command}")
+            logger.debug(f"Command executed successfully: {command}")
 
     # Define a method to start the DHCP server
     def start(self):
-        print("Start DHCP is called from User!!!")
+        logger.info("Start DHCP is called from User!!!")
         self.connect()
         """Start the DHCP server."""
 
-        # Collect dhcp config file from /tmp/dhcpd.conf
+        # Collect d
+        # hcp config file from /tmp/dhcpd.conf
         # Send this file to dhcp server
         # use scp to copy the file to dhcp server
         try:
@@ -92,7 +92,10 @@ class DHCPService:
 
             command = f"sudo chown root:root {DHCPD_CONFIG_SERVER_PATH}"
             stdin, stdout, stderr = self.client.exec_command(command)
-            logger.info(f"Executing command: {command}")            
+            logger.info(f"Executing command: {command}") 
+            logger.debug(f"stdout: {stdout.read().decode()}")
+            logger.debug(f"stderr: {stderr.read().decode()}")
+
 
         except Exception as e:
             logger.error(f"Error copying the DHCP configuration file: {e}")         

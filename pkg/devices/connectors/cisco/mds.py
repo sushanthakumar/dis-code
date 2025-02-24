@@ -17,7 +17,6 @@ CREDENTIALS_PATH = os.path.join(os.path.dirname(__file__), "../login_details/cre
 
 # Define the parameters to be fetched from the devices using SSH, and the corresponding commands and regex patterns
 param_against_file ={
-    "Firmware Version": {"cmd": "Firmware_Version", "regex":r"(.*)"},
     "Software Version": {"cmd": "show version", "regex":r'version\s+(\d+\.\d+\(\d+\))'},
     "Hardware Model": {"cmd": "show version", "regex":r"Hardware\s*\n\s*(cisco\s+[\w\-]+(?:\s[\w\d\-]+)*)"},
 }
@@ -39,6 +38,7 @@ class DeviceInfo(DeviceInfoPlugin):
         # Get the IP Address from the deviceInfo
         ip = deviceInfo.get("IP Address")
         deviceInfo["Vendor Name"] = "Cisco"
+        deviceInfo["AutoGrp"] = "Switch"
         try:
             ssh = SSHClient()
             ssh.load_system_host_keys()

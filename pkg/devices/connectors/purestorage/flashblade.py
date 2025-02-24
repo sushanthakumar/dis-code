@@ -17,9 +17,8 @@ CREDENTIALS_PATH = os.path.join(os.path.dirname(__file__), "../login_details/cre
 
 # Define the parameters to be fetched from the devices using SSH, and the corresponding commands and regex patterns
 param_against_file ={
-    "Firmware Version": {"cmd": "Firmware_Version", "regex":r"(.*)"},
     "Software Version": {"cmd": "show version", "regex":r'Purity//FB\s+(\d+\.\d+\.\d+)'},
-    "Hardware Model": {"cmd": "cat /proc/cpuinfo", "regex":r"model name\s+:(.*)"}
+    #"Hardware Model": {"cmd": "cat /proc/cpuinfo", "regex":r"model name\s+:(.*)"}
     }
 
 class DeviceInfo(DeviceInfoPlugin):
@@ -36,6 +35,7 @@ class DeviceInfo(DeviceInfoPlugin):
         # Get the IP Address from the deviceInfo
         ip = deviceInfo.get("IP Address")
         deviceInfo["Vendor Name"] = "Pure Storage"
+        deviceInfo["AutoGrp"] = "Storage"
         try:
             ssh = SSHClient()
             ssh.load_system_host_keys()
@@ -53,7 +53,6 @@ class DeviceInfo(DeviceInfoPlugin):
                 else:
                     deviceInfo[key] = None
             ssh.close()
-            deviceInfo["Vendor Name"] = "Pure Storage"
         except Exception as e:
             print(f"Error in getting device information: {e}")
             return None

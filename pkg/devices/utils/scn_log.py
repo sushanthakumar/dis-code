@@ -14,7 +14,7 @@ logging.getLogger().setLevel(logging.DEBUG)
 logger = logging.getLogger(__name__)
 # create for console logging
 console = logging.StreamHandler()
-console.setLevel(logging.DEBUG)
+console.setLevel(logging.INFO)
 logger.addHandler(console)
 
 logger.debug("Logger initialized successfully")

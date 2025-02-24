@@ -1,89 +1,89 @@
-Inventory Type,Vendor Name,Hardware Address,IP Address,DHCP Lease,Firmware Version,Software Version,Hardware Model
-Fabric Interconnect,Cisco,bc:09:1b:dd:f1:e9,10.1.1.110,3600,v1.0,4.2(2e),Cisco UCS-FI-6332-16UP-1
-Fabric Interconnect,Cisco,bc:09:1b:dd:f1:a0,10.1.1.111,3600,v1.0,4.2(2e),Cisco UCS-FI-6332-16UP-2
-Fabric Interconnect,Cisco,bc:09:1b:dd:f1:a1,10.1.1.112,3600,v1.0,4.2(2e),Cisco UCS-FI-6332-16UP-3
-Fabric Interconnect,Cisco,bc:09:1b:dd:f1:a2,10.1.1.113,3600,v1.0,4.2(2e),Cisco UCS-FI-6332-16UP-4
-Fabric Interconnect,Cisco,bc:09:1b:dd:f1:a3,10.1.1.114,3600,v1.0,4.2(2e),Cisco UCS-FI-6332-16UP-5
-Fabric Interconnect,Cisco,bc:09:1b:dd:f1:a4,10.1.1.115,3600,v1.0,4.2(2e),Cisco UCS-FI-6332-16UP-6
-Fabric Interconnect,Cisco,bc:09:1b:dd:f1:a5,10.1.1.116,3600,v1.0,4.2(2e),Cisco UCS-FI-6332-16UP-7
-Fabric Interconnect,Cisco,bc:09:1b:dd:f1:a6,10.1.1.117,3600,v1.0,4.2(2e),Cisco UCS-FI-6332-16UP-8
-Nexus 9K,Cisco,bc:09:1b:dd:f1:a7,10.1.1.118,3600,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-1
-Nexus 9K,Cisco,bc:09:1b:dd:f1:a8,10.1.1.119,3600,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-2
-Nexus 9K,Cisco,bc:09:1b:dd:f1:a9,10.1.1.120,3600,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-3
-Nexus 9K,Cisco,bc:09:1b:dd:f1:e9,10.1.1.121,3600,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-4
-Nexus 9K,Cisco,dc:09:1b:dd:f1:a0,10.1.1.122,3600,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-5
-Nexus 9K,Cisco,dc:09:1b:dd:f1:a1,192.168.0.140,3600,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-6
-Nexus 9K,Cisco,dc:09:1b:dd:f1:a2,10.1.1.124,3600,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-7
-Nexus 9K,Cisco,dc:09:1b:dd:f1:a3,10.1.1.125,3600,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-8
-Nexus 9K,Cisco,dc:09:1b:dd:f1:a4,10.1.1.126,3600,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-9
-Nexus 9K,Cisco,dc:09:1b:dd:f1:a5,10.1.1.127,3600,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-10
-Nexus 9K,Cisco,dc:09:1b:dd:f1:a6,10.1.1.128,3600,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-11
-Nexus 9K,Cisco,dc:09:1b:dd:f1:a7,10.1.1.129,3600,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-12
-Nexus 9K,Cisco,dc:09:1b:dd:f1:a8,10.1.1.130,3600,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-13
-Nexus 9K,Cisco,dc:09:1b:dd:f1:a9,192.168.0.140,3600,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-14
-Nexus 9K,Cisco,ec:09:1b:dd:f1:a0,10.1.1.132,3600,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-15
-Nexus 9K,Cisco,ec:09:1b:dd:f1:a1,10.1.1.133,3600,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-16
-MDS,Cisco,ec:09:1b:dd:f1:a2,10.1.1.134,3600,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-1
-MDS,Cisco,ec:09:1b:dd:f1:a3,10.1.1.135,3600,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-2
-MDS,Cisco,ec:09:1b:dd:f1:a4,10.1.1.136,3600,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-3
-MDS,Cisco,ec:09:1b:dd:f1:a5,10.1.1.137,3600,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-4
-MDS,Cisco,ec:09:1b:dd:f1:a6,192.168.0.140,3600,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-5
-MDS,Cisco,ec:09:1b:dd:f1:a7,192.168.0.140,3600,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-6
-MDS,Cisco,ec:09:1b:dd:f1:a8,192.168.0.140,3600,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-7
-MDS,Cisco,ec:09:1b:dd:f1:a9,10.1.1.141,3600,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-8
-MDS,Cisco,fc:09:1b:dd:f1:a1,192.168.0.140,3600,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-9
-MDS,Cisco,fc:09:1b:dd:f1:a2,10.1.1.143,3600,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-10
-MDS,Cisco,fc:09:1b:dd:f1:a3,192.168.0.140,3600,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-11
-MDS,Cisco,fc:09:1b:dd:f1:a4,10.1.1.145,3600,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-12
-MDS,Cisco,fc:09:1b:dd:f1:a5,10.1.1.146,3600,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-13
-MDS,Cisco,fc:09:1b:dd:f1:a6,10.1.1.147,3600,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-14
-MDS,Cisco,fc:09:1b:dd:f1:a7,10.1.1.148,3600,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-15
-MDS,Cisco,fc:09:1b:dd:f1:a8,10.1.1.149,3600,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-16
-MDS,Cisco,fc:09:1b:dd:f1:a9,10.1.1.150,3600,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-17
-MDS,Cisco,fc:10:1b:dd:f1:a1,10.1.1.151,3600,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-18
-MDS,Cisco,fc:10:1b:dd:f1:a2,10.1.1.152,3600,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-19
-MDS,Cisco,fc:10:1b:dd:f1:a3,10.1.1.153,3600,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-20
-MDS,Cisco,fc:10:1b:dd:f1:a4,10.1.1.154,3600,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-21
-MDS,Cisco,fc:10:1b:dd:f1:a5,10.1.1.155,3600,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-22
-MDS,Cisco,fc:10:1b:dd:f1:a6,10.1.1.156,3600,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-23
-MDS,Cisco,fc:10:1b:dd:f1:a7,10.1.1.157,3600,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-24
-MDS,Cisco,fc:10:1b:dd:f1:a8,10.1.1.158,3600,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-25
-MDS,Cisco,fc:10:1b:dd:f1:a9,10.1.1.159,3600,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-26
-MDS,Cisco,fc:11:1b:dd:f1:a0,10.1.1.160,3600,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-27
-MDS,Cisco,fc:11:1b:dd:f1:a1,10.1.1.161,3600,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-28
-MDS,Cisco,fc:11:1b:dd:f1:a2,10.1.1.162,3600,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-29
-MDS,Cisco,fc:11:1b:dd:f1:a3,10.1.1.163,3600,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-30
-MDS,Cisco,fc:11:1b:dd:f1:a4,10.1.1.164,3600,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-31
-MDS,Cisco,fc:11:1b:dd:f1:a5,10.1.1.165,3600,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-32
-Flash Array,Pure Storage,fc:11:1b:dd:f1:a6,10.1.1.166,3600,v1.0,Purity//FA 6.6.10,X10r2-1 
-Flash Array,Pure Storage,fc:11:1b:dd:f1:a7,10.1.1.167,3600,v1.0,Purity//FA 6.6.10,X10r2-2
-Flash Array,Pure Storage,fc:11:1b:dd:f1:a8,10.1.1.168,3600,v1.0,Purity//FA 6.6.10,X10r2-3
-Flash Array,Pure Storage,fc:11:1b:dd:f1:a9,10.1.1.169,3600,v1.0,Purity//FA 6.6.10,X10r2-4
-Flash Array,Pure Storage,fc:12:1b:dd:f1:a0,10.1.1.170,3600,v1.0,Purity//FA 6.6.10,X10r2-5
-Flash Array,Pure Storage,fc:12:1b:dd:f1:a1,10.1.1.171,3600,v1.0,Purity//FA 6.6.10,X10r2-6
-Flash Array,Pure Storage,fc:12:1b:dd:f1:a2,10.1.1.172,3600,v1.0,Purity//FA 6.6.10,X10r2-7
-Flash Array,Pure Storage,fc:12:1b:dd:f1:a3,10.1.1.173,3600,v1.0,Purity//FA 6.6.10,X10r2-8
-Flash Array,Pure Storage,fc:12:1b:dd:f1:a4,10.1.1.174,3600,v1.0,Purity//FA 6.6.10,X10r2-9
-Flash Array,Pure Storage,fc:12:1b:dd:f1:a5,10.1.1.175,3600,v1.0,Purity//FA 6.6.10,X10r2-10
-Flash Array,Pure Storage,fc:12:1b:dd:f1:a6,10.1.1.176,3600,v1.0,Purity//FA 6.6.10,X10r2-11
-Flash Array,Pure Storage,fc:12:1b:dd:f1:a7,10.1.1.177,3600,v1.0,Purity//FA 6.6.10,X10r2-12
-Flash Array,Pure Storage,fc:12:1b:dd:f1:a8,10.1.1.178,3600,v1.0,Purity//FA 6.6.10,X10r2-13
-Flash Array,Pure Storage,fc:12:1b:dd:f1:a9,10.1.1.179,3600,v1.0,Purity//FA 6.6.10,X10r2-14
-Flash Array,Pure Storage,fc:13:1b:dd:f1:a0,10.1.1.180,3600,v1.0,Purity//FA 6.6.10,X10r2-15
-Flash Array,Pure Storage,fc:13:1b:dd:f1:a1,10.1.1.181,3600,v1.0,Purity//FA 6.6.10,X10r2-16
-Flash Array,Pure Storage,fc:13:1b:dd:f1:a2,10.1.1.182,3600,v1.0,Purity//FA 6.6.10,X10r2-17
-Flash Array,Pure Storage,fc:13:1b:dd:f1:a3,10.1.1.183,3600,v1.0,Purity//FA 6.6.10,X10r2-18
-Flash Array,Pure Storage,fc:13:1b:dd:f1:a4,10.1.1.184,3600,v1.0,Purity//FA 6.6.10,X10r2-19
-Flash Blade,Pure Storage,fc:13:1b:dd:f1:a5,10.1.1.185,3600,v1.0,Purity//FA 6.6.10,XFM-8400-1
-Flash Blade,Pure Storage,fc:13:1b:dd:f1:a6,10.1.1.186,3600,v1.0,Purity//FA 6.6.10,XFM-8400-2
-Flash Blade,Pure Storage,fc:13:1b:dd:f1:a7,10.1.1.187,3600,v1.0,Purity//FA 6.6.10,XFM-8400-3
-Flash Blade,Pure Storage,fc:13:1b:dd:f1:a8,10.1.1.188,3600,v1.0,Purity//FA 6.6.10,XFM-8400-4
-Flash Blade,Pure Storage,fc:13:1b:dd:f1:a9,10.1.1.189,3600,v1.0,Purity//FA 6.6.10,XFM-8400-5
-Flash Blade,Pure Storage,fc:14:1b:dd:f1:a0,10.1.1.190,3600,v1.0,Purity//FA 6.6.10,XFM-8400-6
-Flash Blade,Pure Storage,fc:14:1b:dd:f1:a1,10.1.1.191,3600,v1.0,Purity//FA 6.6.10,XFM-8400-7
-Flash Blade,Pure Storage,fc:14:1b:dd:f1:a2,10.1.1.192,3600,v1.0,Purity//FA 6.6.10,XFM-8400-8
-Flash Blade,Pure Storage,fc:14:1b:dd:f1:a3,10.1.1.193,3600,v1.0,Purity//FA 6.6.10,XFM-8400-9
-Flash Blade,Pure Storage,fc:14:1b:dd:f1:a12,10.1.1.194,3600,v1.0,Purity//FA 6.6.10,XFM-8400-10
-Flash Blade,Pure Storage,fc:14:1b:dd:f1:a11,10.1.1.195,3600,v1.0,Purity//FA 6.6.10,XFM-8400-11
-Flash Blade,Pure Storage,fc:14:1b:dd:f1:a10,10.1.1.196,3600,v1.0,Purity//FA 6.6.10,XFM-8400-12
-Flash Blade,Pure Storage,fc:14:1b:dd:f1:a9,10.1.1.197,3600,v1.0,Purity//FA 6.6.10,XFM-8400-13
+Inventory Type,Vendor Name,Hardware Address,IP Address,Firmware Version,Software Version,Hardware Model
+Fabric Interconnect,Cisco,bc:09:1b:dd:f1:e9,10.1.1.110,v1.0,4.2(2e),Cisco UCS-FI-6332-16UP-1
+Fabric Interconnect,Cisco,bc:09:1b:dd:f1:a0,10.1.1.111,v1.0,4.2(2e),Cisco UCS-FI-6332-16UP-2
+Fabric Interconnect,Cisco,bc:09:1b:dd:f1:a1,10.1.1.112,v1.0,4.2(2e),Cisco UCS-FI-6332-16UP-3
+Fabric Interconnect,Cisco,bc:09:1b:dd:f1:a2,10.1.1.113,v1.0,4.2(2e),Cisco UCS-FI-6332-16UP-4
+Fabric Interconnect,Cisco,bc:09:1b:dd:f1:a3,10.1.1.114,v1.0,4.2(2e),Cisco UCS-FI-6332-16UP-5
+Fabric Interconnect,Cisco,bc:09:1b:dd:f1:a4,10.1.1.115,v1.0,4.2(2e),Cisco UCS-FI-6332-16UP-6
+Fabric Interconnect,Cisco,bc:09:1b:dd:f1:a5,10.1.1.116,v1.0,4.2(2e),Cisco UCS-FI-6332-16UP-7
+Fabric Interconnect,Cisco,bc:09:1b:dd:f1:a6,10.1.1.117,v1.0,4.2(2e),Cisco UCS-FI-6332-16UP-8
+Nexus 9K,Cisco,bc:09:1b:dd:f1:a7,10.1.1.118,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-1
+Nexus 9K,Cisco,bc:09:1b:dd:f1:a8,10.1.1.119,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-2
+Nexus 9K,Cisco,bc:09:1b:dd:f1:a9,10.1.1.120,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-3
+Nexus 9K,Cisco,bc:09:1b:dd:f1:e9,10.1.1.121,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-4
+Nexus 9K,Cisco,dc:09:1b:dd:f1:a0,10.1.1.122,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-5
+Nexus 9K,Cisco,dc:09:1b:dd:f1:a1,192.168.0.140,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-6
+Nexus 9K,Cisco,dc:09:1b:dd:f1:a2,10.1.1.124,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-7
+Nexus 9K,Cisco,dc:09:1b:dd:f1:a3,10.1.1.125,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-8
+Nexus 9K,Cisco,dc:09:1b:dd:f1:a4,10.1.1.126,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-9
+Nexus 9K,Cisco,dc:09:1b:dd:f1:a5,10.1.1.127,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-10
+Nexus 9K,Cisco,dc:09:1b:dd:f1:a6,10.1.1.128,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-11
+Nexus 9K,Cisco,dc:09:1b:dd:f1:a7,10.1.1.129,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-12
+Nexus 9K,Cisco,dc:09:1b:dd:f1:a8,10.1.1.130,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-13
+Nexus 9K,Cisco,dc:09:1b:dd:f1:a9,192.168.0.140,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-14
+Nexus 9K,Cisco,ec:09:1b:dd:f1:a0,10.1.1.132,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-15
+Nexus 9K,Cisco,ec:09:1b:dd:f1:a1,10.1.1.133,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-16
+MDS,Cisco,ec:09:1b:dd:f1:a2,10.1.1.134,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-1
+MDS,Cisco,ec:09:1b:dd:f1:a3,10.1.1.135,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-2
+MDS,Cisco,ec:09:1b:dd:f1:a4,10.1.1.136,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-3
+MDS,Cisco,ec:09:1b:dd:f1:a5,10.1.1.137,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-4
+MDS,Cisco,ec:09:1b:dd:f1:a6,192.168.0.140,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-5
+MDS,Cisco,ec:09:1b:dd:f1:a7,192.168.0.140,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-6
+MDS,Cisco,ec:09:1b:dd:f1:a8,192.168.0.140,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-7
+MDS,Cisco,ec:09:1b:dd:f1:a9,10.1.1.141,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-8
+MDS,Cisco,fc:09:1b:dd:f1:a1,192.168.0.140,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-9
+MDS,Cisco,fc:09:1b:dd:f1:a2,10.1.1.143,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-10
+MDS,Cisco,fc:09:1b:dd:f1:a3,192.168.0.140,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-11
+MDS,Cisco,fc:09:1b:dd:f1:a4,10.1.1.145,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-12
+MDS,Cisco,fc:09:1b:dd:f1:a5,10.1.1.146,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-13
+MDS,Cisco,fc:09:1b:dd:f1:a6,10.1.1.147,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-14
+MDS,Cisco,fc:09:1b:dd:f1:a7,10.1.1.148,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-15
+MDS,Cisco,fc:09:1b:dd:f1:a8,10.1.1.149,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-16
+MDS,Cisco,fc:09:1b:dd:f1:a9,10.1.1.150,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-17
+MDS,Cisco,fc:10:1b:dd:f1:a1,10.1.1.151,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-18
+MDS,Cisco,fc:10:1b:dd:f1:a2,10.1.1.152,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-19
+MDS,Cisco,fc:10:1b:dd:f1:a3,10.1.1.153,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-20
+MDS,Cisco,fc:10:1b:dd:f1:a4,10.1.1.154,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-21
+MDS,Cisco,fc:10:1b:dd:f1:a5,10.1.1.155,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-22
+MDS,Cisco,fc:10:1b:dd:f1:a6,10.1.1.156,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-23
+MDS,Cisco,fc:10:1b:dd:f1:a7,10.1.1.157,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-24
+MDS,Cisco,fc:10:1b:dd:f1:a8,10.1.1.158,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-25
+MDS,Cisco,fc:10:1b:dd:f1:a9,10.1.1.159,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-26
+MDS,Cisco,fc:11:1b:dd:f1:a0,10.1.1.160,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-27
+MDS,Cisco,fc:11:1b:dd:f1:a1,10.1.1.161,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-28
+MDS,Cisco,fc:11:1b:dd:f1:a2,10.1.1.162,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-29
+MDS,Cisco,fc:11:1b:dd:f1:a3,10.1.1.163,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-30
+MDS,Cisco,fc:11:1b:dd:f1:a4,10.1.1.164,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-31
+MDS,Cisco,fc:11:1b:dd:f1:a5,10.1.1.165,v1.0,v9.2(2),cisco MDS 9396T 96X 32G FC-32
+Flash Array,Pure Storage,fc:11:1b:dd:f1:a6,10.1.1.166,v1.0,Purity//FA 6.6.10,X10r2-1 
+Flash Array,Pure Storage,fc:11:1b:dd:f1:a7,10.1.1.167,v1.0,Purity//FA 6.6.10,X10r2-2
+Flash Array,Pure Storage,fc:11:1b:dd:f1:a8,10.1.1.168,v1.0,Purity//FA 6.6.10,X10r2-3
+Flash Array,Pure Storage,fc:11:1b:dd:f1:a9,10.1.1.169,v1.0,Purity//FA 6.6.10,X10r2-4
+Flash Array,Pure Storage,fc:12:1b:dd:f1:a0,10.1.1.170,v1.0,Purity//FA 6.6.10,X10r2-5
+Flash Array,Pure Storage,fc:12:1b:dd:f1:a1,10.1.1.171,v1.0,Purity//FA 6.6.10,X10r2-6
+Flash Array,Pure Storage,fc:12:1b:dd:f1:a2,10.1.1.172,v1.0,Purity//FA 6.6.10,X10r2-7
+Flash Array,Pure Storage,fc:12:1b:dd:f1:a3,10.1.1.173,v1.0,Purity//FA 6.6.10,X10r2-8
+Flash Array,Pure Storage,fc:12:1b:dd:f1:a4,10.1.1.174,v1.0,Purity//FA 6.6.10,X10r2-9
+Flash Array,Pure Storage,fc:12:1b:dd:f1:a5,10.1.1.175,v1.0,Purity//FA 6.6.10,X10r2-10
+Flash Array,Pure Storage,fc:12:1b:dd:f1:a6,10.1.1.176,v1.0,Purity//FA 6.6.10,X10r2-11
+Flash Array,Pure Storage,fc:12:1b:dd:f1:a7,10.1.1.177,v1.0,Purity//FA 6.6.10,X10r2-12
+Flash Array,Pure Storage,fc:12:1b:dd:f1:a8,10.1.1.178,v1.0,Purity//FA 6.6.10,X10r2-13
+Flash Array,Pure Storage,fc:12:1b:dd:f1:a9,10.1.1.179,v1.0,Purity//FA 6.6.10,X10r2-14
+Flash Array,Pure Storage,fc:13:1b:dd:f1:a0,10.1.1.180,v1.0,Purity//FA 6.6.10,X10r2-15
+Flash Array,Pure Storage,fc:13:1b:dd:f1:a1,10.1.1.181,v1.0,Purity//FA 6.6.10,X10r2-16
+Flash Array,Pure Storage,fc:13:1b:dd:f1:a2,10.1.1.182,v1.0,Purity//FA 6.6.10,X10r2-17
+Flash Array,Pure Storage,fc:13:1b:dd:f1:a3,10.1.1.183,v1.0,Purity//FA 6.6.10,X10r2-18
+Flash Array,Pure Storage,fc:13:1b:dd:f1:a4,10.1.1.184,v1.0,Purity//FA 6.6.10,X10r2-19
+Flash Blade,Pure Storage,fc:13:1b:dd:f1:a5,10.1.1.185,v1.0,Purity//FA 6.6.10,XFM-8400-1
+Flash Blade,Pure Storage,fc:13:1b:dd:f1:a6,10.1.1.186,v1.0,Purity//FA 6.6.10,XFM-8400-2
+Flash Blade,Pure Storage,fc:13:1b:dd:f1:a7,10.1.1.187,v1.0,Purity//FA 6.6.10,XFM-8400-3
+Flash Blade,Pure Storage,fc:13:1b:dd:f1:a8,10.1.1.188,v1.0,Purity//FA 6.6.10,XFM-8400-4
+Flash Blade,Pure Storage,fc:13:1b:dd:f1:a9,10.1.1.189,v1.0,Purity//FA 6.6.10,XFM-8400-5
+Flash Blade,Pure Storage,fc:14:1b:dd:f1:a0,10.1.1.190,v1.0,Purity//FA 6.6.10,XFM-8400-6
+Flash Blade,Pure Storage,fc:14:1b:dd:f1:a1,10.1.1.191,v1.0,Purity//FA 6.6.10,XFM-8400-7
+Flash Blade,Pure Storage,fc:14:1b:dd:f1:a2,10.1.1.192,v1.0,Purity//FA 6.6.10,XFM-8400-8
+Flash Blade,Pure Storage,fc:14:1b:dd:f1:a3,10.1.1.193,v1.0,Purity//FA 6.6.10,XFM-8400-9
+Flash Blade,Pure Storage,fc:14:1b:dd:f1:a12,10.1.1.194,v1.0,Purity//FA 6.6.10,XFM-8400-10
+Flash Blade,Pure Storage,fc:14:1b:dd:f1:a11,10.1.1.195,v1.0,Purity//FA 6.6.10,XFM-8400-11
+Flash Blade,Pure Storage,fc:14:1b:dd:f1:a10,10.1.1.196,v1.0,Purity//FA 6.6.10,XFM-8400-12
+Flash Blade,Pure Storage,fc:14:1b:dd:f1:a9,10.1.1.197,v1.0,Purity//FA 6.6.10,XFM-8400-13

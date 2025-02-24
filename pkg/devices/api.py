@@ -50,12 +50,28 @@ class Scan(Resource):
         """Function to scan the list of devices"""
         logger.debug("synclist: Scanning for devices... API: /v1/synclist")
         try:
-            devices_list = devices_db.delete_devices()
-            devices_list = devices_db.scan_and_update()
+            conn = devices_db.establish_db_conn()
+            cursor = conn.cursor()
+            cursor.execute("SELECT Hardware_Address, Tags FROM device_db WHERE Tags IS NOT NULL AND Tags != '' ")
+            devices_with_tags = cursor.fetchall()
+            if devices_with_tags:
+                tag_map = {row[0]: row[1] for row in devices_with_tags}
+                logger.debug(f"Tag Map before deletion: {tag_map}")
+                devices_db.delete_devices()
+                devices_db.scan_and_update()
+                for hardware_address, tag in tag_map.items():
+                    cursor.execute("UPDATE device_db SET Tags = ? WHERE Hardware_Address = ?", (tag, hardware_address))
+                conn.commit() 
+                logger.debug("Tags reassigned successfully")
+            else:
+                logger.debug("No devices with tags found, proceeding with normal flow...")
+                devices_db.delete_devices()
+                devices_db.scan_and_update()
             devices_list = devices_db.get_devices_list()
             logger.debug(f"Length of devices_list: {len(devices_list)}")
             return devices_list, 200
         except Exception as e:
+            logger.error(f"Error in synclist API: {e}")
             return {"message": str(e)}, 500
 ############# Discovered devices ##############
 
@@ -95,7 +111,6 @@ class UploadCSV(Resource):
         """Function to save devices file in the database"""
         try:
             logger.debug("Received file upload request...API : /v1/devices/upload")
-            file_path = "/tmp/devices/add_device.csv"
             file_path = "/tmp/devices/add_device.csv"
             logger.debug("Received file path:%s", file_path)
 
@@ -137,12 +152,12 @@ class UploadCSV(Resource):
                         cursor.execute("""
                             UPDATE device_db SET 
                             Inventory_Type = ?, Vendor_Name = ?, Hardware_Address = ?, IP_Address = ?, 
-                            DHCP_Lease = ?, Firmware_Version = ?, 
+                            Firmware_Version = ?, 
                             Software_Version = ?, Hardware_Model = ? , Discovery_Type = "Static"
                             WHERE Hardware_Address = ?
                         """, (
                             device["Inventory Type"], device["Vendor Name"], device["Hardware Address"], device["IP Address"],
-                            device["DHCP Lease"], device["Firmware Version"],
+                            device["Firmware Version"],
                             device["Software Version"], device["Hardware Model"], hardware_address
                        ))
                         # If the device is not found, insert it
@@ -150,12 +165,12 @@ class UploadCSV(Resource):
                         cursor.execute("""
                             INSERT INTO device_db 
                             (Inventory_Type, Vendor_Name, Hardware_Address, IP_Address, 
-                            DHCP_Lease, Firmware_Version, 
+                            Firmware_Version, 
                             Software_Version, Hardware_Model,Discovery_Type) 
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, "Static")
+                            VALUES (?, ?, ?, ?, ?, ?, ?, "Static")
                         """, (
                             device["Inventory Type"], device["Vendor Name"],
-                            device["Hardware Address"], device["IP Address"], device["DHCP Lease"], 
+                            device["Hardware Address"], device["IP Address"],
                             device["Firmware Version"], device["Software Version"], device["Hardware Model"]
                         ))
                 except KeyError as ke:
@@ -373,6 +388,19 @@ class dhcp_service_stop(Resource):
             logger.error(f"Error stopping DHCP service: %s", e)
             return {"message": str(e)}, 500
 
+# Add api to support "/v1/dhcpservice/status" endpoint
+@api.route('/v1/dhcpservice/status')
+class dhcp_service_status(Resource):
+    @api.doc(description="Query DHCP service status.")
+    @api.response(200, "DHCP service status queried  successfully.")
+    @api.response(500, "Internal Server Error.")
+    def get(self):
+        logger.debug("Quering the DHCP service status... API: /v1/dhcpservice/status")
+        try:
+            return devices_db.DHCP_SERVICE_ENABLE            
+        except Exception as e:
+            logger.error(f"Error stopping DHCP service: %s", e)
+            return {"message": str(e)}, 500
 
 #Api to perform recommendation
 @api.route('/v1/upload')

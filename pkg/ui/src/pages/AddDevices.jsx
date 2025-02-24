@@ -1,5 +1,6 @@
 import React, { useState } from 'react'; 
-import { toast } from "react-toastify"; 
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'; 
 
 const AddDevices = () => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -89,6 +90,7 @@ const AddDevices = () => {
             OK
           </button>
         </div>
+        <ToastContainer position="top-right" autoClose={3000} />
       </div>
     </div>
   );

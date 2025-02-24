@@ -38,6 +38,7 @@ class DeviceInfo(DeviceInfoPlugin):
         # Get the IP Address from the deviceInfo
         ip = deviceInfo.get("IP Address")
         deviceInfo["Vendor Name"] = "Cisco"
+        deviceInfo["AutoGrp"] = "Switch"
 
         try:
             ssh = SSHClient()

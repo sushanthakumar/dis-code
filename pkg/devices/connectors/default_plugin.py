@@ -21,10 +21,6 @@ CREDENTIALS_PATH = os.path.join(os.path.dirname(__file__), "./login_details/cred
 
 # Define the parameters to be fetched from the devices using SSH, and the corresponding commands and regex patterns
 param_against_file ={
-    "Inventory Type": {"file": "cat /proc/cpuinfo", "regex":r"vendor_id\s+:(.*)"},
-    "Vendor Name": {"file": "/proc/cpuinfo", "regex":r"vendor_id\s+:(.*)"},    
-    "IP Address": {"file": "IP_Address", "regex":r"(.*)"},
-    "DHCP Lease": {"file": "DHCP_Lease", "regex":r"(.*)"},
     "Firmware Version": {"file": "Firmware_Version", "regex":r"(.*)"},
     "Software Version": {"file": "uname -a", "regex":r"(.*)#"}
 }

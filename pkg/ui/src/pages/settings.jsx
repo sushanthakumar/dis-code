@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addTag, deleteTag, setTags } from "../store/store";
-import { toast } from "react-toastify"; 
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 const transformTags = (data) => {
@@ -166,6 +167,7 @@ const Settings = () => {
           </ul>
         )}
       </div>
+      <ToastContainer position="top-right" autoClose={5000} />
     </div>
   );
 };

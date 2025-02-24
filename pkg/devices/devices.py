@@ -15,6 +15,8 @@ from discovery.connectors.simulator import device_simulator
 from utils.scn_log import logger
 import sys
 import constants
+from datetime import datetime
+
 # Constants
 CWD = os.path.dirname(os.path.abspath(__file__))
 VENDOR_CONNECTORS_PATH = CWD+"/connectors/"
@@ -41,9 +43,9 @@ class ScnDevicesDb:
         Create table if not exists device_db(
             Inventory_Type VARCHAR(255),
             Vendor_Name VARCHAR(255),
+            AutoGrp VARCHAR(225),
             Hardware_Address VARCHAR(255) primary key,
             IP_Address VARCHAR(255),
-            DHCP_Lease VARCHAR(255),
             Firmware_Version VARCHAR(255),
             Software_Version VARCHAR(255),
             Hardware_Model VARCHAR(255),
@@ -67,6 +69,7 @@ class ScnDevicesDb:
 
         # Simluated Devices with meta data
         self.devices_meta_data = device_simulator.scan_devices()
+        print(self.devices_meta_data)
         # Add new column for Discovery Type with value "Simulated"
         for device in self.devices_meta_data:
             device["Discovery Type"] = "Simulated"
@@ -81,18 +84,18 @@ class ScnDevicesDb:
         cursor = self.db_connection.cursor()
         for device in self.devices_meta_data:
 
+            logger.debug(f"Device info: {device}")
             cursor.execute("SELECT * FROM device_db WHERE Hardware_Address = ?", (device["Hardware Address"],))
             #cursor.execute("SELECT COUNT(*) FROM device_db;")
             rows = cursor.fetchall()
-            
             logger.debug(f"Device info: {device}")
 
             if rows:
-                cursor.execute("UPDATE device_db SET Inventory_Type = ?, Vendor_Name = ?, Hardware_Address = ?, IP_Address = ?, DHCP_Lease = ?, Firmware_Version = ?, Software_Version = ?, Hardware_Model = ?, Discovery_Type = ? WHERE Hardware_Address = ?",
-                                (device["Inventory Type"], device["Vendor Name"], device["Hardware Address"], device["IP Address"], device["DHCP Lease"],  device["Firmware Version"], device["Software Version"], device["Hardware Model"], device["Discovery Type"], device["Hardware Address"]))
+                cursor.execute("UPDATE device_db SET Inventory_Type = ?, Vendor_Name = ?, Hardware_Address = ?, IP_Address = ?, Firmware_Version = ?, Software_Version = ?, Hardware_Model = ?, Discovery_Type = ? WHERE Hardware_Address = ?",
+                                (device["Inventory Type"], device["Vendor Name"], device["Hardware Address"], device["IP Address"],  device["Firmware Version"], device["Software Version"], device["Hardware Model"], device["Discovery Type"], device["Hardware Address"]))
             else:
-                cursor.execute("INSERT INTO device_db ( Inventory_Type, Vendor_Name, Hardware_Address, IP_Address, DHCP_Lease, Firmware_Version, Software_Version, Hardware_Model,Discovery_Type) VALUES (?, ?, ?, ?, ?, ?, ?, ?,'DHCP')",
-                                (device["Inventory Type"], device["Vendor Name"], device["Hardware Address"], device["IP Address"], device["DHCP Lease"],  device["Firmware Version"], device["Software Version"], device["Hardware Model"]))
+                cursor.execute("INSERT INTO device_db ( Inventory_Type, Vendor_Name, Hardware_Address, IP_Address, Firmware_Version, Software_Version, Hardware_Model,Discovery_Type) VALUES (?, ?, ?, ?, ?, ?, ?,'DHCP')",
+                                (device["Inventory Type"], device["Vendor Name"], device["Hardware Address"], device["IP Address"], device["Firmware Version"], device["Software Version"], device["Hardware Model"]))
         self.db_connection.commit()
         
 
@@ -111,7 +114,6 @@ class ScnDevicesDb:
                                 "Vendor_Name": row["Vendor_Name"],
                                 "Hardware_Address": row["Hardware_Address"],
                                 "IP_Address": row["IP_Address"],
-                                "DHCP_Lease": row["DHCP_Lease"],
                                 "Firmware_Version": row["Firmware_Version"],
                                 "Software_Version": row["Software_Version"],
                                 "Hardware_Model": row["Hardware_Model"],
@@ -155,23 +157,23 @@ class ScnDevicesDb:
 
         # Step 5: Create a SSH connection to each device and fetch the required parameters
         for device in self.devices:
-            print(f"Scanning device {device['Inventory Type']} with IP {device['ip']}")
+            logger.debug(f"Scanning device {device['Inventory Type']} with IP {device['ip']}")
 
             # Default device information
             device_metadata_information = {
                         'Inventory Type': device["Inventory Type"],
-                        'Vendor Name': 'Unknown',
+                        'Vendor Name': '--',
                         'Hardware Address': device["mac"],
                         'IP Address': device["ip"],
-                        'DHCP Lease': "--",
                         'Firmware Version': "--",
                         'Software Version': "--",
                         "Discovery Type": "DHCP",
-                        'Hardware Model': "Unknown",
+                        'Hardware Model': "--",
             }
 
             # if Inventory Type is available in the DevicePluginsPool, then use the plugin to get the metadata information
             if device["Inventory Type"] in DevicePluginsPool["DevicePluginsPool"].keys(): # Plugins are available for the device
+                logger.debug("Plugin found for %s", device)
                 devicePluginFilePath = DevicePluginsPool["DevicePluginsPool"][device["Inventory Type"]]
                 self.__get_collect_device_info_from_connector(devicePluginFilePath, device_metadata_information)
 
@@ -185,11 +187,11 @@ class ScnDevicesDb:
 
         # Fetch device information from the database
         cursor = self.db_connection.cursor()
-        cursor.execute("SELECT * FROM device_db WHERE Hardware_Model = ?", (id,))
+        cursor.execute("SELECT * FROM device_db WHERE Hardware_Address = ?", (id,))
         device = cursor.fetchone()
 
         if not device:
-            logger.error("Device with Hardware_Model %s not found in database.", id)
+            logger.error("Device with Hardware_Address %s not found in database.", id)
 
             return "Device Not Found"
         
@@ -216,7 +218,6 @@ class ScnDevicesDb:
             'Vendor Name': "Unknown",
             'Hardware Address': "--",
             'IP Address': ip_address,
-            'DHCP Lease': "--",
             'Firmware Version': "--",
             'Software Version': "--",
             'Hardware Model': "--",
