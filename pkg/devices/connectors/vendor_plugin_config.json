@@ -2,7 +2,7 @@
     "DevicePluginsPool": {
         "cisco MDS - tcl": "cisco/mds.py",
         "Cisco UCS-FI-6454": "cisco/fabricinterconnect.py",
-        "cisco N9K-C9336C-FX2" : "cisco/nexus.py",
+        "Cisco N9K-C9336C-FX2" : "cisco/nexus.py",
         "Pure Storage | FlashArray" : "purestorage/flasharray.py",
         "Pure Storage | FlashBlade" : "purestorage/flashblade.py"
     },

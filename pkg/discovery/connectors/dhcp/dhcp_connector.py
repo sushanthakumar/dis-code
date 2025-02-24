@@ -62,7 +62,7 @@ def parse_dhcp_leases_data(lease_data):
     starts_pattern = re.compile(r"starts \d+ (\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2});")
     ends_pattern = re.compile(r"ends \d+ (\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2});")
     hardware_pattern = re.compile(r"hardware ethernet ([\da-fA-F:]+);")
-    uid_pattern = re.compile(r'uid "\000([^";]+)(?:;([^"]+))?";')
+    uid_pattern = re.compile(r'uid "\\([a-zA-Z0-9]+);?([a-zA-Z0-9\s\-]+)";')
     vendor_pattern = re.compile(r'set vendor-class-identifier = "([^"]+)";')
 
     # Parse leases

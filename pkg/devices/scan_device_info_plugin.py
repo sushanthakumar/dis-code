@@ -12,7 +12,7 @@ from abc import ABC, abstractmethod
 #     get_device_info: Abstract method to get the device information
 #     Return type: dict having device information
 #     device information includes:
-#      - Inventory Type,Serial ID,Vendor Name,IP Address,DHCP Lease,DHCP Options,Firmware Version,Software Version,Hardware Model
+#      - Inventory Type,Serial ID,Vendor Name,IP Address,Firmware Version,Software Version,Hardware Model
 
 class DeviceInfoPlugin(ABC):
     def __init__(self):

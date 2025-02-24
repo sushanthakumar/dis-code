@@ -1,34 +1,32 @@
 usecases:
   - ID: 1
     Description: "FlashStack use case1"
-    Server_Type: "Fabric Interconnect"
+    Server_Type: "Cisco UCS-FI-6454"
     Server_Count: 40
     Switch_Type: "cisco MDS - tcl"
     Switch_Count: 2
     Storage_Type: "Pure Storage | FlashArray"
     Storage_Count: 1
 
-
   - ID: 2
     Description: "FlashStack use case2"
-    Server_Type: "Fabric Interconnect"
+    Server_Type: "Cisco UCS-FI-6454"
     Server_Count: 2
     Switch_Type: "cisco MDS - tcl"
-    Switch_Count: 2
+    Switch_Count: 1
     Storage_Type: "Pure Storage | FlashArray"
-    Storage_Count: 100
-  
+    Storage_Count: 1
+
   - ID: 3
     Description: "FlashStack use case3"
-    Server_Type: "Fabric Interconnect"
+    Server_Type: "Cisco UCS-FI-6454"
     Server_Count: 2
-    Switch_Type: "cisco N9K-C9336C-FX2"
-    Switch_Count: 2
+    Switch_Type: "Cisco N9K-C9336C-FX2"
+    Switch_Count: 1
     Storage_Type: "Pure Storage | FlashArray"
     Storage_Count: 2
-
   - ID: 4
-    Server_Type: "Fabric Interconnect"
+    Server_Type: "Cisco UCS-FI-6454"
     Server_Count: 2
     Description: "FlashStack use case4"
     Switch_Type: "cisco MDS - tcl"
@@ -37,10 +35,10 @@ usecases:
     Storage_Count: 2
 
   - ID: 5
-    Server_Type: "Fabric Interconnect"
-    Server_Count: 2
+    Server_Type: "Cisco UCS-FI-6454"
+    Server_Count: 1
     Description: "FlashStack use case5"
     Switch_Type: "cisco MDS - tcl"
-    Switch_Count: 5
+    Switch_Count: 1
     Storage_Type: "Pure Storage | FlashArray"
-    Storage_Count: 2
+    Storage_Count: 1

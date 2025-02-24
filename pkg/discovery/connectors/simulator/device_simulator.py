@@ -8,7 +8,6 @@ import pandas as pd
 import os
 
 DEVICE_META_DATA = os.path.dirname(os.path.abspath(__file__))+"/DeviceMetadata1.csv"
-
 def scan_devices():
     # Check DEVICE_META_DATA_BY_USER exists
     if os.path.exists(DEVICE_META_DATA):

@@ -132,13 +132,13 @@ const Discovery = () => {
       // Call synclist API
       const scanResponse = await fetch("http://127.0.0.1:5000/v1/synclist");
       if (!scanResponse.ok)
-        throw new Error(Scan Error: ${scanResponse.statusText});
+        throw new Error(`Scan Error: ${scanResponse.statusText}`);
       await scanResponse.json();
   
       // Fetch updated devices list after sync
       const listResponse = await fetch("http://127.0.0.1:5000/v1/devices");
       if (!listResponse.ok)
-        throw new Error(List Error: ${listResponse.statusText});
+        throw new Error(`List Error: ${listResponse.statusText}`);
   
       const listData = await listResponse.json();
   
@@ -219,7 +219,7 @@ const Discovery = () => {
 
         const listResponse = await fetch("http://127.0.0.1:5000/v1/devices");
         if (!listResponse.ok)
-          throw new Error(List Error: ${listResponse.statusText});
+          throw new Error(`List Error: ${listResponse.statusText}`);
         const listData = await listResponse.json();
         
       console.log("Raw List API Response:", listData);
@@ -243,7 +243,7 @@ const Discovery = () => {
       console.log("Assigning tag:", { hardwareVersion, tagKeyValue });
   
       const response = await fetch(
-        http://127.0.0.1:5000/v1/devices/${hardwareVersion}/tags,
+        `http://127.0.0.1:5000/v1/devices/${hardwareVersion}/tags`,
         {
           method: "PATCH",
           headers: {
@@ -255,7 +255,7 @@ const Discovery = () => {
       );
   
       if (!response.ok) {
-        throw new Error(Failed to assign tag: ${response.statusText});
+        throw new Error(`Failed to assign tag: ${response.statusText}`);
       }
   
       // Fetch the latest devices after updating the tag
@@ -334,7 +334,7 @@ const Discovery = () => {
       });
 
       const response = await fetch(
-        http://127.0.0.1:5000/v1/devices/healthcheck/${state.selectedHardwareVersion},
+        `http://127.0.0.1:5000/v1/devices/healthcheck/${state.selectedHardwareVersion}`,
         {
           method: "PATCH",
           headers: {
@@ -473,7 +473,7 @@ const filteredDevices = useMemo(() => {
           }
 
           const formattedTags = Object.entries(tagsObj)
-            .map(([key, value]) => ${key}:${value})
+            .map(([key, value]) => `${key}:${value}`)
             .join(", ");
 
           return formattedTags.toLowerCase().includes(state.activeTagFilter.toLowerCase());
@@ -670,9 +670,9 @@ const filteredDevices = useMemo(() => {
                             <div className="absolute bg-white text-black border mt-2 p-2">
                             {tags.map(({ key, value }) => (
                               <div
-                                key={${key}:${value}} // Unique key
+                                key={`${key}:${value}`} // Unique key
                                 onClick={() => {
-                                  localDispatch({ type: "SET_ACTIVE_TAG_FILTER", payload: ${key}:${value} });
+                                  localDispatch({ type: "SET_ACTIVE_TAG_FILTER", payload: `${key}:${value}` });
                                   localDispatch({ type: "TOGGLE_TAG_FILTER_VISIBILITY" });
                                 }}
                                 className="cursor-pointer hover:bg-gray-200 p-1"
@@ -793,21 +793,32 @@ const filteredDevices = useMemo(() => {
                               {device["Hardware_Model"] || "-"}
                             </td>
                             <td className="border px-2 md:px-3 py-1 md:py-2">
-                              {(() => {
-                                try {
-                                  const parsedTags = JSON.parse(device["Tags"] || "[]");
+  {(() => {
+    try {
+      const parsedTags = JSON.parse(device["Tags"] || "[]");
 
-                                  if (!parsedTags || typeof parsedTags !== "object") return "-"; // Ensure it's an object
+      // Ensure it's an array
+      if (!Array.isArray(parsedTags)) return "-";
 
-                                  return Object.entries(parsedTags)
-                                    .map(([key, value]) => ${key}:${value}) // Key-value format
-                                    .join(", ") || "-"; // If empty, show "-"
-                                } catch (error) {
-                                  console.error("Error parsing Tags:", error);
-                                  return "-"; // Default fallback
-                                }
-                              })()}
-                            </td>
+      return parsedTags
+        .map((tag) => {
+          try {
+            const obj = JSON.parse(tag); // Parse each JSON string inside the array
+            return Object.entries(obj)
+              .map(([key, value]) => `${key}:${value}`) // Convert to key:value format
+              .join(", ");
+          } catch {
+            return "-"; // If parsing fails, return "-"
+          }
+        })
+        .join(", ") || "-"; // If empty, show "-"
+    } catch (error) {
+      console.error("Error parsing Tags:", error);
+      return "-"; // Default fallback
+    }
+  })()}
+</td>
+
 
 
                             <td className="border px-2 md:px-3 py-1 md:py-2">
@@ -1069,7 +1080,7 @@ const filteredDevices = useMemo(() => {
 
                                     // Convert the merged object into "key:value" format
                                     return Object.entries(mergedTags)
-                                      .map(([key, value]) => ${key}:${value})
+                                      .map(([key, value]) => `${key}:${value}`)
                                       .join(", ");
                                   }
 
