@@ -19,9 +19,9 @@ CREDENTIALS_PATH = os.path.join(os.path.dirname(__file__), "../login_details/cre
 
 # Define the parameters to be fetched from the devices using SSH, and the corresponding commands and regex patterns
 param_against_file ={
-    "Firmware Version": {"cmd": "show version", "regex":r".*:(.*)"},
-    # "Software Version": {"cmd": "connect nxos", "regex":r'NXOS:\s*version\s*([\d\.N\(\)a-zA-Z]+)'},
-    # "Hardware Model": {"cmd": ["connect nxos","show version"], "regex":r"Hardware\s*\n\s*(cisco\s+[\w\-]+[\w\-]+[\d])"}
+    "Firmware Version": { "regex":r".*:(.*)"},
+    "Software Version": {"regex":r'NXOS:\s*version\s*([\d\.N\(\)a-zA-Z]+)'},
+    "Hardware Model": {"regex":r"Hardware\s*\n\s*(cisco\s+[\w\-]+[\w\-]+[\d])"}
 }
 
 class DeviceInfo(DeviceInfoPlugin):
@@ -32,6 +32,27 @@ class DeviceInfo(DeviceInfoPlugin):
         self.user = credentials.get("fabricinterconnect").get("username")
         self.password = credentials.get("fabricinterconnect").get("password")
         self.port = credentials.get("fabricinterconnect").get("port")
+
+    def execute_nxos_commands(self,ssh):
+        try:
+            shell = ssh.invoke_shell()
+            import time
+
+            # Connect to NXOS mode
+            shell.send("connect nxos\n")
+            time.sleep(2)
+
+            # Run 'show version'
+            shell.send("show version\n")
+            time.sleep(2)
+
+            # Read output
+            output = shell.recv(65535).decode("utf-8")
+            return output
+        except Exception as e:
+            print(f"Error executing NXOS commands: {e}")
+            return None
+    
 
     def get_metadata_info(self, deviceInfo):
         # Do SSH using IP
@@ -44,13 +65,11 @@ class DeviceInfo(DeviceInfoPlugin):
             ssh.load_system_host_keys()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             ssh.connect(ip, port=self.port, username=self.user, password=self.password, timeout=5)
+            # Execute NXOS commands and get output
+            output = self.execute_nxos_commands(ssh)
 
             # Get the device information from the MDS
             for key, value in param_against_file.items():
-                
-                stdin, stdout, stderr = ssh.exec_command(value["cmd"])
-
-                output = stdout.read().decode('utf-8')
                 # Update the deviceInfo with the fetched information or add None if not found
                 if re.search(value["regex"], output,  re.IGNORECASE | re.DOTALL):
                     # Update key value in deviceInfo with the fetched value if key is not there, add it
