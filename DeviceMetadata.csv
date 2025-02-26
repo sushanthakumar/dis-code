@@ -1,0 +1,35 @@
+Inventory Type,Vendor Name,Hardware Address,IP Address,DHCP Lease,Firmware Version,Software Version,Hardware Model,Auto_Grp
+Cisco UCS-FI-6454,Cisco,bc:09:1b:dd:f1:e19,10.1.1.110,3600,v1.0,4.2(2e),Cisco UCS-FI-6332-16UP-1,Cisco UCS-FI-6454
+Cisco UCS-FI-6454,Cisco,bc:09:1b:dd:f1:a10,10.1.1.111,3600,v1.0,4.2(2e),Cisco UCS-FI-6332-16UP-2,Cisco UCS-FI-6454
+Cisco UCS-FI-6454,Cisco,bc:09:1b:dd:f1:a11,10.1.1.112,3600,v1.0,4.2(2e),Cisco UCS-FI-6332-16UP-3,Cisco UCS-FI-6454
+Cisco UCS-FI-6454,Cisco,bc:09:1b:dd:f1:a12,10.1.1.113,3600,v1.0,4.2(2e),Cisco UCS-FI-6332-16UP-4,Cisco UCS-FI-6454
+Cisco UCS-FI-6454,Cisco,bc:09:1b:dd:f1:a13,10.1.1.114,3600,v1.0,4.2(2e),Cisco UCS-FI-6332-16UP-5,Cisco UCS-FI-6454
+Cisco UCS-FI-6454,Cisco,bc:09:1b:dd:f1:a14,10.1.1.115,3600,v1.0,4.2(2e),Cisco UCS-FI-6332-16UP-6,Cisco UCS-FI-6454
+Cisco UCS-FI-6454,Cisco,bc:09:1b:dd:f1:a15,10.1.1.116,3600,v1.0,4.2(2e),Cisco UCS-FI-6332-16UP-7,Cisco UCS-FI-6454
+Cisco UCS-FI-6454,Cisco,bc:09:1b:dd:f1:a16,10.1.1.117,3600,v1.0,4.2(2e),Cisco UCS-FI-6332-16UP-8,Cisco UCS-FI-6454
+Cisco N9K-C9336C-FX2,Cisco,dc:09:1b:dd:f1:a16,10.1.1.128,3600,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-11,Switches
+Cisco N9K-C9336C-FX2,Cisco,dc:09:1b:dd:f1:a17,10.1.1.129,3600,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-12,Switches
+Cisco N9K-C9336C-FX2,Cisco,dc:09:1b:dd:f1:a18,10.1.1.130,3600,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-13,Switches
+Cisco N9K-C9336C-FX2,Cisco,dc:09:1b:dd:f1:a19,192.168.0.140,3600,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-14,Switches
+Cisco N9K-C9336C-FX2,Cisco,ec:09:1b:dd:f1:a10,10.1.1.132,3600,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-15,Switches
+Cisco N9K-C9336C-FX2,Cisco,ec:09:1b:dd:f1:a11,10.1.1.133,3600,v1.0,v10.2,cisco Nexus9000 C9336C-FX2-16,Switches
+cisco MDS - tcl,Cisco,fc:10:1b:dd:f1:a15,10.1.1.155,3600,v1.0,v9.2(2),cisco cisco MDS - tcl 9396T 96X 32G FC-22,Switches
+cisco MDS - tcl,Cisco,fc:10:1b:dd:f1:a16,10.1.1.156,3600,v1.0,v9.2(2),cisco cisco MDS - tcl 9396T 96X 32G FC-23,Switches
+cisco MDS - tcl,Cisco,fc:10:1b:dd:f1:a17,10.1.1.157,3600,v1.0,v9.2(2),cisco cisco MDS - tcl 9396T 96X 32G FC-24,Switches
+cisco MDS - tcl,Cisco,fc:10:1b:dd:f1:a18,10.1.1.158,3600,v1.0,v9.2(2),cisco cisco MDS - tcl 9396T 96X 32G FC-25,Switches
+cisco MDS - tcl,Cisco,fc:10:1b:dd:f1:a19,10.1.1.159,3600,v1.0,v9.2(2),cisco cisco MDS - tcl 9396T 96X 32G FC-26,Switches
+cisco MDS - tcl,Cisco,fc:11:1b:dd:f1:a10,10.1.1.160,3600,v1.0,v9.2(2),cisco cisco MDS - tcl 9396T 96X 32G FC-27,Switches
+cisco MDS - tcl,Cisco,fc:11:1b:dd:f1:a11,10.1.1.161,3600,v1.0,v9.2(2),cisco cisco MDS - tcl 9396T 96X 32G FC-28,Switches
+cisco MDS - tcl,Cisco,fc:11:1b:dd:f1:a12,10.1.1.162,3600,v1.0,v9.2(2),cisco cisco MDS - tcl 9396T 96X 32G FC-29,Switches
+cisco MDS - tcl,Cisco,fc:11:1b:dd:f1:a13,10.1.1.163,3600,v1.0,v9.2(2),cisco cisco MDS - tcl 9396T 96X 32G FC-30,Switches
+cisco MDS - tcl,Cisco,fc:11:1b:dd:f1:a14,10.1.1.164,3600,v1.0,v9.2(2),cisco cisco MDS - tcl 9396T 96X 32G FC-31,Switches
+cisco MDS - tcl,Cisco,fc:11:1b:dd:f1:a15,10.1.1.165,3600,v1.0,v9.2(2),cisco cisco MDS - tcl 9396T 96X 32G FC-32,Switches
+Pure Storage | FlashArray,Pure Storage,fc:13:1b:dd:f1:a10,10.1.1.180,3600,v1.0,Purity//FA 6.6.10,X10r2-15,Storage
+Pure Storage | FlashArray,Pure Storage,fc:13:1b:dd:f1:a11,10.1.1.181,3600,v1.0,Purity//FA 6.6.10,X10r2-16,Storage
+Pure Storage | FlashArray,Pure Storage,fc:13:1b:dd:f1:a12,10.1.1.182,3600,v1.0,Purity//FA 6.6.10,X10r2-17,Storage
+Pure Storage | FlashArray,Pure Storage,fc:13:1b:dd:f1:a13,10.1.1.183,3600,v1.0,Purity//FA 6.6.10,X10r2-18,Storage
+Pure Storage | FlashArray,Pure Storage,fc:13:1b:dd:f1:a14,10.1.1.184,3600,v1.0,Purity//FA 6.6.10,X10r2-19,Storage
+Pure Storage | FlashBlade,Pure Storage,fc:13:1b:dd:f1:a15,10.1.1.185,3600,v1.0,Purity//FA 6.6.10,XFM-8400-1,Storage
+Pure Storage | FlashBlade,Pure Storage,fc:13:1b:dd:f1:a16,10.1.1.186,3600,v1.0,Purity//FA 6.6.10,XFM-8400-2,Storage
+Pure Storage | FlashBlade,Pure Storage,fc:13:1b:dd:f1:a17,10.1.1.187,3600,v1.0,Purity//FA 6.6.10,XFM-8400-3,Storage
+Pure Storage | FlashBlade,Pure Storage,fc:13:1b:dd:f1:a18,10.1.1.188,3600,v1.0,Purity//FA 6.6.10,XFM-8400-4,Storage
