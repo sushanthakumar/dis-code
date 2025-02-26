@@ -1,3 +1,11 @@
+/*
+Project name : SmartConfigNxt
+Title : Settings.jsx
+Description : Create custom groups through tags. This will be used to group devices..
+Author :  Caze Labs
+version :1.0 
+*/
+
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addTag, deleteTag, setTags } from "../store/store";
@@ -167,7 +175,7 @@ const Settings = () => {
           </ul>
         )}
       </div>
-      <ToastContainer position="top-right" autoClose={5000} />
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 };

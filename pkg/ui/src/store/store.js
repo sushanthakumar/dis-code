@@ -1,11 +1,17 @@
-import { configureStore, createSlice } from "@reduxjs/toolkit";
+/*
+Project name : SmartConfigNxt
+Title : store.jsx
+Description : Manages Redux state with slices..
+Author :  Caze Labs
+version :1.0 
+*/
 
-// Devices slice
+import { configureStore, createSlice } from "@reduxjs/toolkit";
 const deviceSlice = createSlice({
   name: "devices",
   initialState: [],
   reducers: {
-    setDevices: (state, action) => action.payload, 
+    setDevices: (state, action) => action.payload,
   },
 });
 
@@ -17,11 +23,11 @@ const tagsSlice = createSlice({
     addTag: (state, action) => {
       return [...state, action.payload];
     },
-    
+
     deleteTag: (state, action) => {
-      return state.filter((tag) => tag.id !== action.payload); 
+      return state.filter((tag) => tag.id !== action.payload);
     },
-    setTags: (state, action) => action.payload, 
+    setTags: (state, action) => action.payload,
   },
 });
 
@@ -34,9 +40,9 @@ export const fetchTags = () => async (dispatch) => {
   if (cachedData) {
     const { timestamp, data } = JSON.parse(cachedData);
     if (Date.now() - timestamp < CACHE_DURATION) {
-      
+
       dispatch(setTags(data));
-      
+
     }
   }
   try {
@@ -45,7 +51,7 @@ export const fetchTags = () => async (dispatch) => {
       throw new Error("Failed to fetch tags.");
     }
     const data = await response.json();
-    
+
     const transformedTags = data.map((item) => {
       const tagObject = item[1] || {};
       const key = Object.keys(tagObject).find((key) => key.trim()) || "";
@@ -60,7 +66,7 @@ export const fetchTags = () => async (dispatch) => {
       cacheKey,
       JSON.stringify({ timestamp: Date.now(), data: transformedTags })
     );
-    dispatch(setTags(transformedTags)); 
+    dispatch(setTags(transformedTags));
   } catch (error) {
     console.error("Error fetching tags:", error);
   }

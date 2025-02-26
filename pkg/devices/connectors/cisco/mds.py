@@ -1,6 +1,6 @@
 '''
 File: scn_disc_db.py
-Author: Sandhya, Kamal
+Author: Caze Labs
 Description: This file contains the class ScnDevicesDb which is used to create and write data to the database from MDS.
 '''
 import os
@@ -23,7 +23,9 @@ param_against_file ={
 
 
 class DeviceInfo(DeviceInfoPlugin):
+    '''This class is used to get the metadata information from the Nexus device.'''
     def __init__(self):
+        '''Initialize the class with the credentials from the credentials.json file.'''
         with open(CREDENTIALS_PATH, 'r') as fd:
             credentials = json.load(fd)
         
@@ -33,12 +35,12 @@ class DeviceInfo(DeviceInfoPlugin):
         
 
     def get_metadata_info(self, deviceInfo):
-
+        ''''''
         # Do SSH using IP
         # Get the IP Address from the deviceInfo
         ip = deviceInfo.get("IP Address")
         deviceInfo["Vendor Name"] = "Cisco"
-        deviceInfo["AutoGrp"] = "Switch"
+        deviceInfo["Auto_Grp"] = "Switch"
         try:
             ssh = SSHClient()
             ssh.load_system_host_keys()

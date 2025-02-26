@@ -1,3 +1,11 @@
+/*
+Project name : SmartConfigNxt
+Title : sideBar.jsx
+Description : The sidebar provides navigation to different sections of the application.
+Author :  Caze Labs
+version :1.0 
+*/
+
 import React, { useState, useCallback, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
@@ -19,7 +27,7 @@ import Logo2 from "../assets/Picture1.png";
 
 const Sidebar = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Sidebar visibility state
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); 
   const location = useLocation();
 
   const toggleSettings = useCallback(() => {

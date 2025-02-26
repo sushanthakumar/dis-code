@@ -1,32 +1,40 @@
+/*
+Project name : SmartConfigNxt
+Title : DhcpServer.jsx
+Description : Manage the DHCP server by uploading a file containing server configuration.
+Author :  Caze Labs
+version :1.0 
+*/
+
 import React, { useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const DhcpServer = () => {
   const [file, setFile] = useState(null);
-  const [status, setStatus] = useState(null); 
+  const [status, setStatus] = useState(null);
 
   useEffect(() => {
     console.log("Updated status:", status);
   }, [status]);
 
-  // Fetch DHCP status on component mount
+
   useEffect(() => {
     const fetchDhcpStatus = async () => {
       try {
         const response = await fetch("http://127.0.0.1:5000/v1/dhcpservice/status");
-    
+
         if (!response.ok) {
           console.error("Failed to fetch DHCP status:", response.status);
           toast.error(`Failed to fetch DHCP status: ${response.status}`);
           return;
         }
-    
-        const data = await response.json();  // ✅ Expecting JSON
-    
+
+        const data = await response.json();
+
         console.log("Full API Response:", data);
-    
-        if (typeof data === "boolean") {  // If API returns `true` or `false`
+
+        if (typeof data === "boolean") {
           setStatus(data);
         } else if (data && typeof data.status !== "undefined") {
           setStatus(data.status === true || data.status === "true");
@@ -39,7 +47,7 @@ const DhcpServer = () => {
         toast.error("Error fetching DHCP status");
       }
     };
-    
+
     fetchDhcpStatus();
   }, []);
 
@@ -80,7 +88,7 @@ const DhcpServer = () => {
       });
 
       if (response.ok) {
-        setStatus(true); // Set status as started
+        setStatus(true);
         toast.success("DHCP started successfully.");
       } else {
         toast.error("Failed to start DHCP.");
@@ -97,7 +105,7 @@ const DhcpServer = () => {
       });
 
       if (response.ok) {
-        setStatus(false); // Set status as stopped
+        setStatus(false);
         toast.success("DHCP stopped successfully.");
       } else {
         toast.error("Failed to stop DHCP.");
@@ -126,9 +134,9 @@ const DhcpServer = () => {
         </div>
 
         <div className="text-center">
-        {status === null ? (
-          <p>Loading...</p>
-        ) :status ? (
+          {status === null ? (
+            <p>Loading...</p>
+          ) : status ? (
             <button
               onClick={handleStop}
               className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
@@ -145,7 +153,7 @@ const DhcpServer = () => {
           )}
         </div>
 
-        <ToastContainer position="top-right" autoClose={5000} />
+        <ToastContainer position="top-right" autoClose={3000} />
       </div>
     </div>
   );

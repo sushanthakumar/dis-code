@@ -1,10 +1,6 @@
-
-
-
-
 '''
 File: scn_disc_db.py
-Author: Sandhya, Kamal
+Author: Caze Labs
 Description: This file contains the class ScnDevicesDb which is used to create and write data to the database from MDS.
 '''
 import os
@@ -27,7 +23,9 @@ param_against_file ={
 
 
 class DeviceInfo(DeviceInfoPlugin):
+    '''This class is used to get the metadata information from the default device.'''
     def __init__(self):
+        '''Initialize the class with the credentials from the credentials.json file.'''
         with open(CREDENTIALS_PATH, 'r') as fd:
             credentials = json.load(fd)
         
@@ -37,7 +35,7 @@ class DeviceInfo(DeviceInfoPlugin):
         
 
     def get_metadata_info(self, deviceInfo):
-
+        '''Get the metadata information from the default device.'''
         print("Getting metadata info...from default_plugin.py")
 
         # Do SSH using IP

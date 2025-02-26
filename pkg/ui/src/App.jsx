@@ -1,3 +1,11 @@
+/*
+Project name : SmartConfigNxt
+Title : App.jsx
+Description : Manages app layout and state.
+Author :  Caze Labs
+version :1.0 
+*/
+
 import React, { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { useDispatch } from "react-redux";

@@ -38,3 +38,10 @@ def test_removing_stale_info_from_lease_file_03():
     # Get the length of entries having the same HW address": 88:fc:5d:27:01:a0
     assert len([d for d in devices if d['mac'] == "88:fc:5d:27:01:a0"]) == 1
 
+
+def test_parse_name_after_uid_04():
+    DHCP_LEASE_PATH = PWD+"/data/dhcp_lease_after_uid.lease"
+    print("Lease file path = ", DHCP_LEASE_PATH)
+    devices = parse_dhcp_leases(DHCP_LEASE_PATH)
+    for d in devices:
+        print(d)

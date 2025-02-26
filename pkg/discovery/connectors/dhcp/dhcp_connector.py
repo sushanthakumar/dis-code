@@ -1,6 +1,6 @@
 '''
 File: discovery_main.py
-Author: Kamal and Sandhya
+Author: Caze Labs
 Description: This file contains the main functions to get IP and 
 '''
 
@@ -55,7 +55,7 @@ def fetch_dhcp_leases_via_ssh(dhcp_server_ip, username, password, local_path, po
 
 # Function to parse the DHCP lease file
 def parse_dhcp_leases_data(lease_data):
-
+    '''Parse the DHCP lease file data and return a list of devices.'''
     devices_info = []
     # Regular expressions
     lease_pattern = re.compile(r"lease (\d+\.\d+\.\d+\.\d+) {")
@@ -93,6 +93,7 @@ def parse_dhcp_leases_data(lease_data):
 
 # Function to parse the DHCP lease file
 def parse_dhcp_leases(lease_file="dhcpd.leases"):
+    '''Parse the DHCP lease file and return a list of devices.'''
     devices = []
     try:
         with open(lease_file, "r") as file:
@@ -126,6 +127,7 @@ def parse_dhcp_leases(lease_file="dhcpd.leases"):
 
 # Function to remove duplicate devices
 def remove_duplicates(devices):
+    '''Remove duplicate devices based on MAC address.'''
     seen = set()
     unique_devices = []
     for device in devices:
@@ -142,12 +144,14 @@ def remove_duplicates(devices):
 
 # Function to enrich the device information with vendor details
 def enrich_vendor_info(devices):
+    '''Enrich the device information with vendor details.'''
     for device in devices:
         device["vendor"] = "Unknown"  # Placeholder for vendor information
     return devices
 
 # Function to check if a device is a Cisco device based on its MAC address
 def is_cisco_device(mac):
+    '''Check if a device is a Cisco device based on its MAC address.'''
     cisco_ouis = ["00:50:56", "00:40:96", "00:14:5E", "00:24:14"]  # Add other Cisco OUIs as needed
     oui = mac.upper()[:8]
     return oui in cisco_ouis
@@ -164,6 +168,7 @@ def save_to_csv(filename, devices):
 
 # Function to get the device information
 def scan_devices():
+    '''Scan devices on the network and return the device information.'''
     # If file DEVICE_SCAN_CONFIG_PATH does not exist, create it
     if os.path.exists(DHCP_HOST_DETAILS):
         DHCPServerDetails = json.load(open(DHCP_HOST_DETAILS))

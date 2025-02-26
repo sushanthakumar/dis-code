@@ -1,3 +1,9 @@
+'''
+File Name: constants.py
+Author: Caze Labs
+Description: This file contains the constants used in the device management API server.
+'''
+
 DHCP_HOST_CONFIG_FILE = "/tmp/dhcp_host.conf"
 DHCPD_CONFIG_FILE = "/tmp/dhcpd.conf"
 DHCPD_CONFIG_SERVER_PATH = "/etc/dhcp/dhcpd.conf"

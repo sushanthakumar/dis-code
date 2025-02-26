@@ -1,0 +1,272 @@
+openapi: 3.0.1
+info:
+  title: SCN v0.1.1 API
+  version: "0.1.1"
+servers:
+- url: /
+tags:
+- name: API Server
+  description: SCN v0.1.1 API Specification
+paths:
+  /v1/customtags:
+    get:
+      tags:
+      - tags
+      operationId: get_tag
+      responses:
+        "200":
+          description: Success
+          content: {}
+    post:
+      tags:
+      - tags
+      description: Retrieve records.
+      operationId: post_tag
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/tags'
+        required: true
+      responses:
+        "200":
+          description: Successfull .
+          content: {}
+        "404":
+          description: Not found.
+          content: {}
+        "500":
+          description: Internal Server Error.
+          content: {}
+      x-codegen-request-body-name: payload
+    delete:
+      tags:
+      - tags
+      operationId: delete_tag
+      parameters:
+      - name: id
+        in: query
+        description: Delete Tag
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Tag successfully deleted.
+          content: {}
+        "400":
+          description: Tag name is required.
+          content: {}
+        "404":
+          description: Tag not found.
+          content: {}
+  /v1/devices:
+    get:
+      tags:
+      - device management
+      summary: Function to retrieve the list of devices
+      description: Retrieve records.
+      operationId: get_list
+      responses:
+        "200":
+          description: Successfully retrieved .
+          content: {}
+        "404":
+          description: Not found.
+          content: {}
+        "500":
+          description: Internal Server Error.
+          content: {}
+  /v1/devices/healthcheck/{id}:
+    patch:
+      tags:
+      - device management
+      description: Update healthcare device status.
+      operationId: patch_healthcheck
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Device status updated successfully.
+          content: {}
+        "404":
+          description: Device not found.
+          content: {}
+  /v1/devices/upload:
+    post:
+      tags:
+      - device management
+      summary: Function to save devices file in the database
+      description: Upload a device CSV file .
+      operationId: post_upload_csv
+      responses:
+        "201":
+          description: File uploaded successfully.
+          content: {}
+        "400":
+          description: Invalid file path or format.
+          content: {}
+        "500":
+          description: Internal server error.
+          content: {}
+  /v1/devices/{id}/tags:
+    patch:
+      tags:
+      - device management
+      operationId: patch_device_tag
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/device_db'
+        required: true
+      responses:
+        "200":
+          description: Success
+          content: {}
+      x-codegen-request-body-name: payload
+  /v1/dhcpdconf:
+    post:
+      tags:
+      - dhcp
+      description: Upload dhcpd.conf file.
+      operationId: post_dhcpd_conf
+      responses:
+        "200":
+          description: File uploaded successfully.
+          content: {}
+        "400":
+          description: Invalid file path or format.
+          content: {}
+        "500":
+          description: Internal server error.
+          content: {}
+  /v1/dhcpserver:
+    post:
+      tags:
+      - dhcp
+      description: Upload dhcp server details.
+      operationId: post_dhcp_server
+      responses:
+        "200":
+          description: File uploaded successfully.
+          content: {}
+        "400":
+          description: Invalid file path or format.
+          content: {}
+        "500":
+          description: Internal server error.
+          content: {}
+  /v1/dhcpservice/start:
+    patch:
+      tags:
+      - dhcp
+      description: Start the DHCP service.
+      operationId: patch_dhcp_service_start
+      responses:
+        "200":
+          description: DHCP service started successfully.
+          content: {}
+        "500":
+          description: Internal Server Error.
+          content: {}
+  /v1/dhcpservice/status:
+    get:
+      tags:
+      - dhcp
+      description: Query DHCP service status.
+      operationId: get_dhcp_service_status
+      responses:
+        "200":
+          description: DHCP service status queried  successfully.
+          content: {}
+        "500":
+          description: Internal Server Error.
+          content: {}
+  /v1/dhcpservice/stop:
+    patch:
+      tags:
+      - dhcp
+      description: Stop the DHCP service.
+      operationId: patch_dhcp_service_stop
+      responses:
+        "200":
+          description: DHCP service stopped successfully.
+          content: {}
+        "500":
+          description: Internal Server Error.
+          content: {}
+  /v1/new_upload:
+    post:
+      tags:
+      - device management
+      description: devices.
+      operationId: post_new_upload
+      responses:
+        "200":
+          description: Success
+          content: {}
+  /v1/synclist:
+    get:
+      tags:
+      - device management
+      summary: Function to scan the list of devices
+      description: Retrieve records.
+      operationId: get_scan
+      responses:
+        "200":
+          description: Successfully retrieved the devices.
+          content: {}
+        "404":
+          description: Not found.
+          content: {}
+        "500":
+          description: Internal Server Error.
+          content: {}
+  /v1/upload:
+    post:
+      tags:
+      - device management
+      description: devices.
+      operationId: post_upload
+      responses:
+        "200":
+          description: Success
+          content: {}
+components:
+  schemas:
+    device_db:
+      required:
+      - Tag
+      type: object
+      properties:
+        Tag:
+          type: object
+          properties: {}
+          description: Select a tag
+    tags:
+      required:
+      - Tags
+      type: object
+      properties:
+        Tags:
+          type: object
+          properties: {}
+          description: Add a tag
+  responses:
+    ParseError:
+      description: When a mask can't be parsed
+      content: {}
+    MaskError:
+      description: When any error occurs on mask
+      content: {}
+x-original-swagger-version: "2.0"

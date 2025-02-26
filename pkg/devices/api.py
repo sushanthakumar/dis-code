@@ -4,7 +4,7 @@ python scn-p1-discovery/core/scn_discovery/src/scn_disc_main.py
 Project name : SmartConfigNxt
 title : scn_disc_main.py
 Discription : Discovery and Usecase recommendation 
-author : Kamal, Sandhya
+author : Caze Labs
 version :1.0
 '''
 import sys
@@ -23,12 +23,12 @@ from discovery.connectors.simulator import device_simulator
 from discovery.services.dhcp_server.dhcp_service import DHCPService
 import constants
 
-# Create the Flask app
+# 1. Create the Flask app
 app = Flask(__name__)
-# Create the API
+# 2. Create the API
 CORS(app)
 api = Api(app, title="Device Management API", version="1.0")
-# Create the device database object
+# 3. Create the device database object
 devices_db = ScnDevicesDb()
 dhcp_service = DHCPService()
 model_list = api.model('device_db',{
@@ -151,12 +151,12 @@ class UploadCSV(Resource):
                     if rows:
                         cursor.execute("""
                             UPDATE device_db SET 
-                            Inventory_Type = ?, Vendor_Name = ?, Hardware_Address = ?, IP_Address = ?, 
+                            Inventory_Type = ?, Vendor_Name = ?,Auto_Grp = ?, Hardware_Address = ?, IP_Address = ?, 
                             Firmware_Version = ?, 
                             Software_Version = ?, Hardware_Model = ? , Discovery_Type = "Static"
                             WHERE Hardware_Address = ?
                         """, (
-                            device["Inventory Type"], device["Vendor Name"], device["Hardware Address"], device["IP Address"],
+                            device["Inventory Type"], device["Vendor Name"],device["Auto_Grp"], device["Hardware Address"], device["IP Address"],
                             device["Firmware Version"],
                             device["Software Version"], device["Hardware Model"], hardware_address
                        ))
@@ -164,12 +164,12 @@ class UploadCSV(Resource):
                     else:
                         cursor.execute("""
                             INSERT INTO device_db 
-                            (Inventory_Type, Vendor_Name, Hardware_Address, IP_Address, 
+                            (Inventory_Type, Vendor_Name,Auto_Grp, Hardware_Address, IP_Address, 
                             Firmware_Version, 
                             Software_Version, Hardware_Model,Discovery_Type) 
-                            VALUES (?, ?, ?, ?, ?, ?, ?, "Static")
+                            VALUES (?, ?, ?, ?, ?, ?, ?,?, "Static")
                         """, (
-                            device["Inventory Type"], device["Vendor Name"],
+                            device["Inventory Type"], device["Vendor Name"],device["Auto_Grp"],
                             device["Hardware Address"], device["IP Address"],
                             device["Firmware Version"], device["Software Version"], device["Hardware Model"]
                         ))
@@ -187,6 +187,9 @@ class UploadCSV(Resource):
 @api.expect(model_list)
 class device_tag(Resource):
     def patch(self, id):
+        '''
+        Function to update the tags for a device.
+        '''
         logger.debug(f"Received API request to update tags for device ID: {id}, API: /v1/devices/<id>/tags")
         data = request.json
         tags = data.get("Tag", {})
@@ -244,6 +247,9 @@ class Healthcheck(Resource):
     @api.response(200, "Device status updated successfully.")
     @api.response(404, "Device not found.")
     def patch(self,id):
+        '''
+        Function to update the device status.
+        '''
         logger.debug("Updating device status...")
         try:
             logger.debug(f"Received API request to update device status for ID: {id}, API: /v1/devices/healthcheck/<id>")
@@ -257,7 +263,7 @@ class Healthcheck(Resource):
             
             device_status = devices_db.healthcheck(id)
             if not device_status:  # If the function fails to return a status
-                print(f"Healthcheck returned None for device ID {id}.")
+                logger.error(f"Healthcheck returned None for device ID {id}.")
                 return {"message": "Healthcheck failed."}, 500
 
             cursor.execute("UPDATE device_db SET status = ? WHERE Hardware_Address = ?", (device_status, id))
@@ -278,6 +284,9 @@ class Healthcheck(Resource):
 class tag(Resource):
     #Retrives the tags data from the tags table
     def get(self):
+        '''
+        Function to retrieve tags data from the tags table.
+        '''
         logger.debug("Retrieving tags data...")
         conn = devices_db.establish_db_conn()
         cursor = conn.cursor()
@@ -299,6 +308,9 @@ class tag(Resource):
     @api.response(404, "Not found.")
     @api.response(500, "Internal Server Error.")
     def post(self):
+        '''
+        Function to create a new tag.
+        '''
         logger.debug("Creating a new tag...")
         try:
             logger.debug(f"Request JSON: {request.json}, API: /v1/customtags")
@@ -325,6 +337,9 @@ class tag(Resource):
     @api.response(400, "Tag name is required.")
     @api.response(404, "Tag not found.")
     def delete(self):
+        '''
+        Function to delete a tag for a given Tag ID.
+        '''
         ID = request.args.get('id')
         logger.debug(f"Received API request to delete tag with ID: {ID}, API: /v1/customtags")
         if not ID:
@@ -359,6 +374,9 @@ class dhcp_service_start(Resource):
     @api.response(200, "DHCP service started successfully.")
     @api.response(500, "Internal Server Error.")
     def patch(self):
+        '''
+        Function to start the DHCP service.
+        '''
         logger.debug("Patch Starting the DHCP service... API: /v1/dhcpservice/start")
         try:
             dhcp_service.start()
@@ -378,6 +396,9 @@ class dhcp_service_stop(Resource):
     @api.response(200, "DHCP service stopped successfully.")
     @api.response(500, "Internal Server Error.")
     def patch(self):
+        '''
+        Function to stop the DHCP service.
+        '''
         logger.debug("Stopping the DHCP service... API: /v1/dhcpservice/stop")
         try:
             dhcp_service.stop()
@@ -395,6 +416,9 @@ class dhcp_service_status(Resource):
     @api.response(200, "DHCP service status queried  successfully.")
     @api.response(500, "Internal Server Error.")
     def get(self):
+        '''
+        Function to query the DHCP service status. True/False
+        '''
         logger.debug("Quering the DHCP service status... API: /v1/dhcpservice/status")
         try:
             return devices_db.DHCP_SERVICE_ENABLE            
@@ -454,6 +478,9 @@ class new_upload(Resource):
 # Return error message if the file write fails.
 @api.route('/v1/dhcpdconf')
 class DhcpdConf(Resource):
+    '''
+    API to handle the data dhcpd.conf file upload.
+    '''
     @api.doc(description="Upload dhcpd.conf file.")
     @api.response(200, "File uploaded successfully.")
     @api.response(400, "Invalid file path or format.")
@@ -492,6 +519,9 @@ class DhcpServer(Resource):
     @api.response(400, "Invalid file path or format.")
     @api.response(500, "Internal server error.")
     def post(self):
+        '''
+        Function to handle the data for dhcp server details and keep the content in local.
+        '''
         logger.debug("Received file upload request...API : /v1/dhcpserver")
         try:
             # Read the file content directly without saving

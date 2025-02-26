@@ -4,7 +4,8 @@ if [ -d "reports" ]; then
   rm -rf reports
 fi
 
-pytest --cov=../pkg/discovery --cov=../pkg/devices \
+export PYTHONPATH=../pkg/devices/
+pytest -s --cov=../pkg/discovery --cov=../pkg/devices \
       --cov-report=html:reports/coverage_report \
       --junitxml=reports/test_report.xml \
       --html=reports/test_report.html

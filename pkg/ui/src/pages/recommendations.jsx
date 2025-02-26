@@ -1,25 +1,33 @@
+/*
+Project name : SmartConfigNxt
+Title : recommendation.jsx
+Description : Provides the recommended deployment use cases based on the devices available.
+Author :  Caze Labs
+version :1.0 
+*/
+
 import React, { useState, useEffect } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
 const Recommend = () => {
-  const [usecases, setUsecases] = useState([]); 
-  const [loading, setLoading] = useState(true); 
-  const [error, setError] = useState(null); 
-  const [selectedUsecaseId, setSelectedUsecaseId] = useState(null); 
-  const [details, setDetails] = useState({}); 
+  const [usecases, setUsecases] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedUsecaseId, setSelectedUsecaseId] = useState(null);
+  const [details, setDetails] = useState({});
 
-  
+
   useEffect(() => {
     const fetchUsecases = async () => {
       try {
         const response = await fetch("http://127.0.0.1:5001/v1/usecases/recommendations");
-        
+
         if (!response.ok) {
-          // If response is a client/server error, set custom message
+
           if (response.status >= 400 && response.status < 500) {
             throw new Error("No recommended use cases");
           }
-          throw new Error("Failed to fetch data");
+          throw new Error("No devices found to provide recommendation");
         }
 
         const data = await response.json();
@@ -32,12 +40,12 @@ const Recommend = () => {
     };
 
     fetchUsecases();
-}, []);
+  }, []);
 
   const handleViewMore = useDebouncedCallback(async (usecaseId) => {
-    
+
     if (selectedUsecaseId === usecaseId) {
-      setSelectedUsecaseId(null); 
+      setSelectedUsecaseId(null);
       return;
     }
     if (details[usecaseId]) {
@@ -46,7 +54,7 @@ const Recommend = () => {
     }
 
     try {
-      setSelectedUsecaseId(usecaseId); 
+      setSelectedUsecaseId(usecaseId);
       const response = await fetch(
         `http://127.0.0.1:5001/v1/usecases/${usecaseId}`
       );
@@ -56,13 +64,13 @@ const Recommend = () => {
         );
       }
 
-      const text = await response.text(); 
-      const sanitizedText = text.replace(/NaN/g, "null"); 
-      const data = JSON.parse(sanitizedText); 
+      const text = await response.text();
+      const sanitizedText = text.replace(/NaN/g, "null");
+      const data = JSON.parse(sanitizedText);
 
       setDetails((prevDetails) => ({
         ...prevDetails,
-        [usecaseId]: data.details[0], 
+        [usecaseId]: data.details[0],
       }));
     } catch (error) {
       console.error("Error fetching use case details:", error);
@@ -74,7 +82,7 @@ const Recommend = () => {
       <h1 className="text-2xl p-2 font-bold">Recommended Use cases</h1>
       <p className="text-sm md:text-base mb-4">Provides the recommended deployment use cases based on the devices available</p>
 
-      
+
       <div className="w-full max-w-10xl max-h-10xl overflow-hidden">
         <div className="overflow-y-auto max-h-[500px] border border-gray-300 rounded-lg shadow">
           <table className="table-auto w-full text-left border-collapse mb-4">
@@ -102,9 +110,8 @@ const Recommend = () => {
                 usecases.map((usecase, index) => (
                   <React.Fragment key={index}>
                     <tr
-                      className={`${
-                        index % 2 === 0 ? "bg-orange-100" : "bg-white"
-                      }`}
+                      className={`${index % 2 === 0 ? "bg-orange-100" : "bg-white"
+                        }`}
                     >
                       <td className="border px-4 py-2">{usecase.Usecase_ID}</td>
                       <td className="border px-4 py-2">
@@ -120,7 +127,7 @@ const Recommend = () => {
                       </td>
                     </tr>
 
-                    
+
                     {selectedUsecaseId === usecase.Usecase_ID && (
                       <tr>
                         <td

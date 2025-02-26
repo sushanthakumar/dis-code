@@ -2,7 +2,7 @@
 
 '''
 File: scn_usecase_main.py
-Author: Sandhya, Kamal
+Author: Caze Labs
 Description: This file contains the APIs to handle usecase and recommendations
 '''
 
@@ -17,6 +17,7 @@ from flask_restx import Api
 from flask import jsonify
 import requests
 import sys
+
 ######### Configuration ##########
 USECASE_YAML_FILE = os.path.join(os.path.dirname(__file__), "../../config/usecase.yaml")
 # Get API link from command line argument

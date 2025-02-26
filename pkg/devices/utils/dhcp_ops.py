@@ -1,6 +1,6 @@
 '''
 File: dhcp_ops.py
-Author: Sandhya and Kamal
+Author: Caze Labs
 Description: This file contains the functions to perform operations on the DHCP server.
 '''
 
@@ -15,6 +15,7 @@ from utils.scn_log import logger
 
 # Enum for Oprating Systems
 class OS:
+    '''Enum for Operating Systems'''
     UBUNTU = "ubuntu"
     CENTOS = "centos"
     DEBIAN = "debian"
@@ -23,6 +24,7 @@ class OS:
     UNKNOWN = "unknown"
 
 def get_os_name(client):
+    '''Function to get the OS name of the remote server'''
     try:
         logger.debug(f"Getting OS name... with client = {client}")
         # Check if /etc/os-release file exists (Works for CentOS, Ubuntu, Debian, etc.)
@@ -67,6 +69,7 @@ def get_os_name(client):
         logger.error(f"Error getting OS name: {e}")
 
 def dhcp_ops_get_service_name(client):
+    '''Function to get the DHCP service name based on the OS'''
     os_name = get_os_name(client)
     if os_name == OS.UBUNTU:
         service_name = "isc-dhcp-server"
@@ -79,6 +82,7 @@ def dhcp_ops_get_service_name(client):
 
 # Function to get the DHCP lease file name based on the OS
 def dhcp_ops_get_lease_file_name(client):
+    '''Function to get the DHCP lease file name based on the OS'''
     os_name = get_os_name(client)
     if os_name == OS.UBUNTU:
         lease_file = "/var/lib/dhcp/dhcpd.leases"

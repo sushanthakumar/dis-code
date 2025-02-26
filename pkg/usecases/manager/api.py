@@ -2,7 +2,7 @@
 
 '''
 File: scn_usecase_main.py
-Author: Sandhya, Kamal
+Author: Caze Labs
 Description: This file contains the APIs to handle usecase and recommendations
 '''
 
@@ -50,6 +50,7 @@ api = Api(app, title="Usecase API", version="1.0")
 #api to add new usecases and retrive all the usecases
 @api.route('/v1/usecases/')
 class usecase(Resource):
+    '''This class is used to add new usecases and retrieve all the usecases'''
     #Retrives all the records fron the usecase table
     @api.doc(description="Retrieve records.",
              )
@@ -57,6 +58,7 @@ class usecase(Resource):
     @api.response(404, "Not found.")
     @api.response(500, "Internal Server Error.")
     def get(self):
+        '''Retrieves all the records from the usecase table.'''
         #print("yaml file", CWD+"/../config/usecase.yaml")
         try:
             with open(USECASE_YAML_FILE, "r") as file:
@@ -80,7 +82,9 @@ class usecase(Resource):
 
 @api.route('/v1/usecases/<int:id>')
 class usecase_id(Resource):
+    '''This class is used to get the details of a specific usecase.'''
     def get(self,id):
+        '''Retrieves the details of a specific usecase.'''
         try:
             with open(USECASE_YAML_FILE, "r") as file:
                 data = yaml.safe_load(file)
@@ -113,7 +117,9 @@ class usecase_id(Resource):
 @api.route('/v1/usecases/recommendations')  
 @api.doc(description="Recommendations.")
 class recommendations(Resource):
+    '''This class is used to get the recommendations based on the devices.'''
     def get(self):
+        '''Get the recommendations based on the devices.'''
         try:
             #Loads data from the Recommendations file
             Recommendation.load_data(self)

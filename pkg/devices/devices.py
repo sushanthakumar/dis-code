@@ -1,8 +1,9 @@
 '''
 File: scn_disc_db.py
-Author: Sandhya, Kamal
+Author: Caze Labs
 Description: This file contains the class ScnDevicesDb which is used to create and write data to the database.
 '''
+
 import os
 import sqlite3
 import json
@@ -17,7 +18,7 @@ import sys
 import constants
 from datetime import datetime
 
-# Constants
+# Constants only for this file
 CWD = os.path.dirname(os.path.abspath(__file__))
 VENDOR_CONNECTORS_PATH = CWD+"/connectors/"
 VENDOR_PLUGINS_PATH = CWD+"/connectors/vendor_plugin_config.json"
@@ -25,15 +26,15 @@ DevicePluginsPool = json.load(open(VENDOR_PLUGINS_PATH))
 
 # Create class for db file create and write the data to the database
 class ScnDevicesDb:
+    '''This class is used to create and write data to the database.'''
     def __init__(self):
         self.devices_meta_data = []
         self.DHCP_SERVICE_ENABLE = False
-        DEVICE_SCAN_CONFIG_PATH = CWD+"/config/device_config.json"
-        DHCPConfigDetails = json.load(open(DEVICE_SCAN_CONFIG_PATH))
         self.establish_db_conn()
 
     #Function to make the database connection
     def establish_db_conn(self):
+        '''Function to establish the database connection'''
         self.db_connection = sqlite3.connect("scn_device_info.db", check_same_thread=False)   
         
         cursor = self.db_connection.cursor()
@@ -43,7 +44,7 @@ class ScnDevicesDb:
         Create table if not exists device_db(
             Inventory_Type VARCHAR(255),
             Vendor_Name VARCHAR(255),
-            AutoGrp VARCHAR(225),
+            Auto_Grp VARCHAR(225),
             Hardware_Address VARCHAR(255) primary key,
             IP_Address VARCHAR(255),
             Firmware_Version VARCHAR(255),
@@ -65,6 +66,7 @@ class ScnDevicesDb:
 
     #Function to write the data to the database
     def scan_and_update(self):
+        '''Function to scan the devices and update the database'''
         logger.debug("Scanning devices and updating the database")
 
         # Simluated Devices with meta data
@@ -91,16 +93,16 @@ class ScnDevicesDb:
             logger.debug(f"Device info: {device}")
 
             if rows:
-                cursor.execute("UPDATE device_db SET Inventory_Type = ?, Vendor_Name = ?, Hardware_Address = ?, IP_Address = ?, Firmware_Version = ?, Software_Version = ?, Hardware_Model = ?, Discovery_Type = ? WHERE Hardware_Address = ?",
-                                (device["Inventory Type"], device["Vendor Name"], device["Hardware Address"], device["IP Address"],  device["Firmware Version"], device["Software Version"], device["Hardware Model"], device["Discovery Type"], device["Hardware Address"]))
+                cursor.execute("UPDATE device_db SET Inventory_Type = ?, Vendor_Name = ?, Auto_Grp = ?, Hardware_Address = ?, IP_Address = ?, Firmware_Version = ?, Software_Version = ?, Hardware_Model = ?, Discovery_Type = ? WHERE Hardware_Address = ?",
+                                (device["Inventory Type"], device["Vendor Name"],device["Auto_Grp"], device["Hardware Address"], device["IP Address"],  device["Firmware Version"], device["Software Version"], device["Hardware Model"], device["Discovery Type"], device["Hardware Address"]))
             else:
-                cursor.execute("INSERT INTO device_db ( Inventory_Type, Vendor_Name, Hardware_Address, IP_Address, Firmware_Version, Software_Version, Hardware_Model,Discovery_Type) VALUES (?, ?, ?, ?, ?, ?, ?,'DHCP')",
-                                (device["Inventory Type"], device["Vendor Name"], device["Hardware Address"], device["IP Address"], device["Firmware Version"], device["Software Version"], device["Hardware Model"]))
+                cursor.execute("INSERT INTO device_db ( Inventory_Type, Vendor_Name,Auto_Grp, Hardware_Address, IP_Address, Firmware_Version, Software_Version, Hardware_Model,Discovery_Type) VALUES (?, ?, ?, ?, ?, ?, ?,?,'DHCP')",
+                                (device["Inventory Type"], device["Vendor Name"],device["Auto_Grp"], device["Hardware Address"], device["IP Address"], device["Firmware Version"], device["Software Version"], device["Hardware Model"]))
         self.db_connection.commit()
         
 
-    #Function to write the data to the database
     def get_devices_list(self):
+        '''Function to get the devices list from the database'''
         cursor = self.db_connection.cursor()
         cursor.row_factory = sqlite3.Row
         cursor.execute("SELECT * FROM device_db")
@@ -117,6 +119,7 @@ class ScnDevicesDb:
                                 "Firmware_Version": row["Firmware_Version"],
                                 "Software_Version": row["Software_Version"],
                                 "Hardware_Model": row["Hardware_Model"],
+                                "Auto_Grp" : row["Auto_Grp"],
                                 "Tags": row["Tags"],
                                 "Status": row["status"],
                                 "Discovery_Type": row["Discovery_Type"]})        
@@ -124,6 +127,7 @@ class ScnDevicesDb:
 
     #Function to delete the devices from the database whos device type is DHCP
     def delete_devices(self):
+        '''Function to delete the devices from the database whos device type is DHCP'''
         logger.debug("Deleting the entryies with discovery type: DHCP")
         cursor = self.db_connection.cursor()
         cursor.execute("DELETE FROM device_db WHERE Discovery_Type = 'DHCP'")
@@ -131,6 +135,7 @@ class ScnDevicesDb:
         self.db_connection.commit()    
 
     def __get_collect_device_info_from_connector(self, devicePluginFilePath, device_metadata_information):
+        '''Function to get the device information from the connector'''
         try:
             # DevicePluginsPool[device["Inventory Type"]] is library path to the device plugin
             # Example: DevicePluginsPool[device["Inventory Type"]] = "/data/scn_discovery/vendor_plugins/mds.py"
@@ -154,8 +159,8 @@ class ScnDevicesDb:
             logger.debug("Error: ", e)
 
     def __get_device_meta_data(self):
-
-        # Step 5: Create a SSH connection to each device and fetch the required parameters
+        '''Function to get the device metadata information'''
+        # Create a SSH connection to each device and fetch the required parameters
         for device in self.devices:
             logger.debug(f"Scanning device {device['Inventory Type']} with IP {device['ip']}")
 
@@ -181,8 +186,9 @@ class ScnDevicesDb:
                 logger.debug("No plugin found for %s", device)
                 self.__get_collect_device_info_from_connector(DevicePluginsPool["DefaultPlugin"], device_metadata_information)
 
-    #Function to get the device health "offline" or "online"
+
     def healthcheck(self, id):
+        '''Function to get the device health "offline" or "online"'''
         logger.debug("Starting healthcheck for device ID %s...", id)
 
         # Fetch device information from the database

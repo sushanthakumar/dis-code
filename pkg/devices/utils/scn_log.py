@@ -1,6 +1,6 @@
 '''
 File Name: scn_log.py
-Author: Sandhya and Kamal
+Author: Caze Labs
 Description: This file contains the logging configuration for the device management API server.
 '''
 
@@ -16,5 +16,4 @@ logger = logging.getLogger(__name__)
 console = logging.StreamHandler()
 console.setLevel(logging.INFO)
 logger.addHandler(console)
-
 logger.debug("Logger initialized successfully")

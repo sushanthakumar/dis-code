@@ -12,12 +12,14 @@ from constants import DHCP_HOST_CONFIG_FILE, DHCPD_CONFIG_FILE, TEMP_REMOTE_PATH
 from utils.dhcp_ops import dhcp_ops_get_service_name
 
 class DHCPService:
+    '''This class is used to start, stop, and check the status of the DHCP server.'''
     # Define the constructor to initialize the DHCP server IP, username, and password and port number
     def __init__(self):
         self.client = None
 
     # Define a method to connect to the DHCP server and keep client object
     def connect(self):
+        '''Connect to the DHCP server.'''
         logger.info("Connecting to the DHCP server...")
         
         """Connect to the DHCP server."""
@@ -62,6 +64,7 @@ class DHCPService:
 
     # Define a method to start the DHCP server
     def start(self):
+        '''Start the DHCP server.'''
         logger.info("Start DHCP is called from User!!!")
         self.connect()
         """Start the DHCP server."""

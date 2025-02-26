@@ -1,3 +1,11 @@
+/*
+Project name : SmartConfigNxt
+Title : AddDevices.jsx
+Description : Upload a file to add devices.
+Author :  Caze Labs
+version :1.0 
+*/
+
 import React, { useState } from 'react'; 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; 
@@ -65,7 +73,7 @@ const AddDevices = () => {
     <div className="min-h-screen bg-[#FBE7CC] p-6 flex flex-col items-center">
       <h1 className="text-2xl lg:text-3xl p-2 font-bold">Add Devices</h1>
       <p className="text-sm md:text-base lg:text-lg mb-4 text-center max-w-md">
-        Upload a file to add devices.
+        Upload a file to add static devices.
       </p>
 
       <div className="w-full max-w-screen-md bg-orange-100 p-6 shadow rounded-lg">

@@ -1,6 +1,6 @@
 '''
 File: device_sim_main.py
-Authors: Kamal, Sandhya
+Authors: Caze Labs
 Description: Simulates discovring devices and providing meta data directly
 '''
 
@@ -9,6 +9,7 @@ import os
 
 DEVICE_META_DATA = os.path.dirname(os.path.abspath(__file__))+"/DeviceMetadata1.csv"
 def scan_devices():
+    '''Scan devices and return the metadata.'''
     # Check DEVICE_META_DATA_BY_USER exists
     if os.path.exists(DEVICE_META_DATA):
         # Read CSV file

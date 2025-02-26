@@ -1,9 +1,17 @@
+/*
+Project name : SmartConfigNxt
+Title : usecase.jsx
+Description : Provides the supported use cases for deployment.
+Author :  Caze Labs
+version :1.0 
+*/
+
 import React, { useEffect, useState } from "react";
 
 const UseCases = () => {
   const [useCases, setUseCases] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null); 
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchUseCases = async () => {
@@ -11,14 +19,14 @@ const UseCases = () => {
         const response = await fetch("http://127.0.0.1:5001/v1/usecases/");
         const text = await response.text();
 
-       
+
         const sanitizedText = text.replace(/\bNaN\b/g, "null");
         const data = JSON.parse(sanitizedText);
 
         setUseCases(data);
       } catch (err) {
         console.error("Error fetching use cases:", err);
-        setError("Failed to fetch use cases."); 
+        setError("Failed to fetch use cases.");
       } finally {
         setLoading(false);
       }
@@ -66,9 +74,8 @@ const UseCases = () => {
                 useCases.map((useCase, index) => (
                   <tr
                     key={useCase.ID}
-                    className={`${
-                      index % 2 === 0 ? "bg-orange-100" : "bg-white"
-                    }`}
+                    className={`${index % 2 === 0 ? "bg-orange-100" : "bg-white"
+                      }`}
                   >
                     <td className="border px-4 py-2">{useCase.ID}</td>
                     <td className="border px-4 py-2">

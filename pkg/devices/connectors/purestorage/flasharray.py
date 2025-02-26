@@ -22,7 +22,9 @@ param_against_file ={
     }
 
 class DeviceInfo(DeviceInfoPlugin):
+    '''This class is used to get the metadata information from the Fabric Interconnect device.'''
     def __init__(self):
+        ''''''
         with open(CREDENTIALS_PATH, 'r') as fd:
             credentials = json.load(fd)
         
@@ -31,11 +33,12 @@ class DeviceInfo(DeviceInfoPlugin):
         self.port = credentials.get("flasharray").get("port")
 
     def get_metadata_info(self, deviceInfo):
+        ''' Get the metadata information from the Nexus device.'''
         # Do SSH using IP
         # Get the IP Address from the deviceInfo
         ip = deviceInfo.get("IP Address")
         deviceInfo["Vendor Name"] = "Pure Storage"
-        deviceInfo["AutoGrp"] = "Storage"
+        deviceInfo["Auto_Grp"] = "Storage"
         try:
             ssh = SSHClient()
             ssh.load_system_host_keys()
