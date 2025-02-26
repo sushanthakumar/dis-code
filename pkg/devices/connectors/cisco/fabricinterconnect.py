@@ -20,8 +20,8 @@ CREDENTIALS_PATH = os.path.join(os.path.dirname(__file__), "../login_details/cre
 # Define the parameters to be fetched from the devices using SSH, and the corresponding commands and regex patterns
 param_against_file ={
     "Firmware Version": { "regex":r".*:(.*)"},
-    "Software Version": {"regex":r'NXOS:\s*version\s*([\d\.N\(\)a-zA-Z]+)'},
-    "Hardware Model": {"regex":r"Hardware\s*\n\s*(cisco\s+[\w\-]+[\w\-]+[\d])"}
+    "Software Version": {"regex":r'NXOS:\s+version\s+([\d\.\(\)A-Za-z\-]+)'},
+    "Hardware Model": {"regex":r"Hardware\s*\n\s*(cisco\s+UCS-FI-\d+)"}
 }
 
 class DeviceInfo(DeviceInfoPlugin):
